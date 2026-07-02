@@ -99,23 +99,132 @@ img {
   display: block;
   min-height: calc(100vh - 65px);
   padding: clamp(18px, 4vw, 46px) 0;
-  overflow: hidden;
-  background:
-    linear-gradient(112deg, rgba(72, 180, 90, 0.12) 0 1px, transparent 1px 58px),
-    linear-gradient(40deg, rgba(72, 180, 90, 0.07) 0 1px, transparent 1px 74px),
-    linear-gradient(116deg, rgba(255, 255, 255, 0.98) 0 42%, rgba(239, 247, 238, 0.9) 42% 100%),
-    var(--bg);
+  overflow: visible;
+  background: transparent;
   color: var(--ink);
+  --hero-bg-base: #ffffff;
+  --hero-bg-tint: #eff7ee;
+  --hero-back-base: var(--hero-bg-base);
+  --hero-grid-color: #48b45a;
+  --hero-back-grid-a: rgba(72, 180, 90, 0.12);
+  --hero-back-grid-b: rgba(72, 180, 90, 0.07);
+  --hero-back-panel: linear-gradient(116deg, var(--hero-bg-base) 0 42%, var(--hero-bg-tint) 42% 100%);
+  --hero-axis: rgba(72, 180, 90, 0.3);
+  --hero-link: rgba(72, 180, 90, 0.42);
+  --hero-link-soft: rgba(72, 180, 90, 0.24);
+  --hero-ring: rgba(42, 148, 61, 0.78);
+  --hero-small-ring: rgba(30, 120, 47, 0.5);
+  --hero-molecule-shadow: rgba(72, 180, 90, 0.18);
+  --hero-logo-color: #050505;
+  --hero-logo-outline-color: #050505;
+  --hero-logo-outline: transparent;
+  --hero-logo-glow: transparent;
+  --hero-logo-opacity: 0.9;
+  --hero-logo-scale: 1;
+  --hero-logo-x: 0px;
+  --hero-logo-y: 0px;
+  --hero-ring-color: var(--hero-grid-color);
+  --hero-link-color: var(--hero-grid-color);
+  --hero-grid-scale: 1;
+  --hero-grid-x: 0px;
+  --hero-grid-y: 0px;
+  --hero-molecule-opacity: 0.82;
+}
+
+.hero-theme-green {
+  --hero-logo-color: #050505;
+  --hero-logo-outline-color: #050505;
+  --hero-grid-color: #48b45a;
+  --hero-ring-color: var(--hero-grid-color);
+  --hero-link-color: var(--hero-grid-color);
+}
+
+.hero-theme-mono {
+  --hero-bg-base: #050505;
+  --hero-bg-tint: #050505;
+  --hero-back-base: #050505;
+  --hero-back-grid-a: rgba(255, 255, 255, 0.06);
+  --hero-back-grid-b: rgba(255, 255, 255, 0.04);
+  --hero-back-panel: linear-gradient(116deg, #050505 0 100%);
+  --hero-axis: rgba(255, 255, 255, 0.22);
+  --hero-link: rgba(255, 255, 255, 0.34);
+  --hero-link-soft: rgba(255, 255, 255, 0.18);
+  --hero-ring: rgba(255, 255, 255, 0.76);
+  --hero-small-ring: rgba(255, 255, 255, 0.44);
+  --hero-molecule-shadow: rgba(255, 255, 255, 0.12);
+  --hero-logo-color: #ffffff;
+  --hero-logo-outline-color: #7a7a7a;
+  --hero-logo-outline: rgba(255, 255, 255, 0.5);
+  --hero-logo-glow: rgba(255, 255, 255, 0.16);
+  --hero-ring-color: #ffffff;
+  --hero-link-color: #8a8a8a;
 }
 
 .hero::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 49% 0 auto;
-  z-index: 0;
+  z-index: -1;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(72, 180, 90, 0.32), transparent);
+  background: linear-gradient(90deg, transparent, var(--hero-axis), transparent);
+}
+
+.hero-background-plane {
+  position: fixed;
+  inset: 65px 0 0;
+  z-index: -5;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    var(--hero-back-panel),
+    var(--hero-back-base);
+}
+
+.hero-background-grid {
+  position: fixed;
+  inset: 65px -32px -32px;
+  z-index: -4;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    linear-gradient(112deg, var(--hero-back-grid-a) 0 1px, transparent 1px 58px),
+    linear-gradient(40deg, var(--hero-back-grid-b) 0 1px, transparent 1px 74px);
+  background-position:
+    0 0,
+    0 0;
+  background-size:
+    640px 640px,
+    760px 760px;
+  transform:
+    translate3d(var(--hero-grid-x), var(--hero-grid-y), 0)
+    scale(var(--hero-grid-scale));
+  transform-origin: center;
+  animation: hero-grid-distant-drift 38s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+}
+
+.hero-background-logo {
+  position: fixed;
+  top: clamp(30px, 5.8vh, 62px);
+  left: 50%;
+  z-index: -1;
+  width: min(720px, 66vw);
+  aspect-ratio: 540 / 129;
+  max-width: none;
+  pointer-events: none;
+  background: var(--hero-logo-color);
+  opacity: var(--hero-logo-opacity);
+  transform:
+    translateX(calc(-50% + var(--hero-logo-x)))
+    translateY(var(--hero-logo-y))
+    scale(var(--hero-logo-scale));
+  transform-origin: center top;
+  -webkit-mask: url("/assets/logo-teiko-mask.png") center / contain no-repeat;
+  mask: url("/assets/logo-teiko-mask.png") center / contain no-repeat;
+  filter: none;
+  animation: hero-logo-distant-drift 32s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 .hero-back {
@@ -131,16 +240,25 @@ img {
 }
 
 .molecule-field {
-  position: absolute;
-  inset: 16% -7% auto 34%;
-  z-index: 0;
-  width: min(1100px, 78vw);
+  position: fixed;
+  top: clamp(118px, 18vh, 172px);
+  left: 50%;
+  z-index: -2;
+  width: min(1280px, 104vw);
   height: auto;
   pointer-events: none;
   overflow: visible;
-  opacity: 0.74;
-  transform: rotate(-1deg) translate3d(0, 0, 0);
-  filter: drop-shadow(0 12px 28px rgba(72, 180, 90, 0.14));
+  opacity: var(--hero-molecule-opacity);
+  transform:
+    translateX(calc(-50% + var(--hero-grid-x)))
+    translateY(var(--hero-grid-y))
+    rotate(-1deg)
+    scale(var(--hero-grid-scale))
+    translate3d(0, 0, 0);
+  transform-origin: center top;
+  filter: drop-shadow(0 12px 28px var(--hero-molecule-shadow));
+  animation: hero-molecule-distant-drift 44s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 .molecule-field path,
@@ -150,32 +268,121 @@ img {
 }
 
 .molecule-links path {
-  stroke: rgba(72, 180, 90, 0.42);
+  stroke: color-mix(in srgb, var(--hero-link-color) 72%, transparent);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .molecule-links path:first-child {
-  stroke: rgba(72, 180, 90, 0.24);
+  stroke: color-mix(in srgb, var(--hero-link-color) 42%, transparent);
   stroke-width: 2;
 }
 
 .molecule-rings polygon {
-  stroke: rgba(42, 148, 61, 0.78);
+  stroke: color-mix(in srgb, var(--hero-ring-color) 78%, transparent);
   stroke-width: 8;
   stroke-linejoin: round;
 }
 
 .molecule-small polygon {
-  stroke: rgba(30, 120, 47, 0.5);
+  stroke: color-mix(in srgb, var(--hero-ring-color) 50%, transparent);
   stroke-width: 5;
   stroke-linejoin: round;
+}
+
+@keyframes hero-grid-distant-drift {
+  0% {
+    background-position:
+      0 0,
+      0 0;
+    transform:
+      translate3d(calc(var(--hero-grid-x) - 8px), calc(var(--hero-grid-y) - 5px), 0)
+      scale(var(--hero-grid-scale));
+  }
+
+  50% {
+    background-position:
+      18px 12px,
+      -14px 8px;
+    transform:
+      translate3d(calc(var(--hero-grid-x) + 4px), calc(var(--hero-grid-y) + 3px), 0)
+      scale(var(--hero-grid-scale));
+  }
+
+  100% {
+    background-position:
+      32px 20px,
+      -26px 16px;
+    transform:
+      translate3d(calc(var(--hero-grid-x) + 9px), calc(var(--hero-grid-y) + 6px), 0)
+      scale(var(--hero-grid-scale));
+  }
+}
+
+@keyframes hero-logo-distant-drift {
+  0% {
+    transform:
+      translateX(calc(-50% + var(--hero-logo-x) - 4px))
+      translateY(calc(var(--hero-logo-y) - 2px))
+      scale(var(--hero-logo-scale));
+  }
+
+  50% {
+    transform:
+      translateX(calc(-50% + var(--hero-logo-x) + 3px))
+      translateY(calc(var(--hero-logo-y) + 1px))
+      scale(var(--hero-logo-scale));
+  }
+
+  100% {
+    transform:
+      translateX(calc(-50% + var(--hero-logo-x) + 6px))
+      translateY(calc(var(--hero-logo-y) + 3px))
+      scale(var(--hero-logo-scale));
+  }
+}
+
+@keyframes hero-molecule-distant-drift {
+  0% {
+    transform:
+      translateX(calc(-50% + var(--hero-grid-x) - 12px))
+      translateY(calc(var(--hero-grid-y) - 5px))
+      rotate(-1deg)
+      scale(var(--hero-grid-scale))
+      translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform:
+      translateX(calc(-50% + var(--hero-grid-x) + 5px))
+      translateY(calc(var(--hero-grid-y) + 3px))
+      rotate(-0.85deg)
+      scale(var(--hero-grid-scale))
+      translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform:
+      translateX(calc(-50% + var(--hero-grid-x) + 14px))
+      translateY(calc(var(--hero-grid-y) + 7px))
+      rotate(-1.12deg)
+      scale(var(--hero-grid-scale))
+      translate3d(0, 0, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-track {
     transition: none;
+  }
+
+  .hero-background-plane,
+  .hero-background-grid,
+  .hero-background-logo,
+  .molecule-field,
+  .hero-progress.is-running::after {
+    animation: none;
   }
 
   .hero-card > img,
@@ -186,10 +393,6 @@ img {
   .about > div,
   .reveal-item {
     transition: none;
-  }
-
-  .hero-progress.is-running::after {
-    animation: none;
   }
 
   .reveal-item {
@@ -379,6 +582,151 @@ img {
   to {
     transform: translateX(0);
   }
+}
+
+.debug-toggle {
+  position: fixed;
+  top: 82px;
+  right: 16px;
+  z-index: 62;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(5, 5, 5, 0.14);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  backdrop-filter: blur(16px) saturate(1.1);
+}
+
+.debug-toggle.is-active {
+  background: var(--ink);
+  color: white;
+}
+
+.debug-panel {
+  position: fixed;
+  top: 134px;
+  right: 16px;
+  z-index: 60;
+  display: grid;
+  gap: 12px;
+  width: min(318px, calc(100vw - 32px));
+  max-height: calc(100vh - 150px);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid rgba(5, 5, 5, 0.12);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
+  color: var(--ink);
+  font-size: 12px;
+  backdrop-filter: blur(18px) saturate(1.1);
+}
+
+.debug-panel[hidden] {
+  display: none;
+}
+
+.debug-panel-head,
+.debug-layer-title,
+.debug-color-control,
+.debug-control {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+}
+
+.debug-panel-head {
+  grid-template-columns: 1fr auto;
+}
+
+.debug-panel-head strong {
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.debug-panel-head button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: white;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.debug-layer {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(5, 5, 5, 0.1);
+}
+
+.debug-layer-title,
+.debug-color-control {
+  grid-template-columns: 52px 1fr auto;
+}
+
+.debug-layer-title {
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.debug-layer-title span:last-child {
+  justify-self: end;
+  color: var(--ink);
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.debug-color-control {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.debug-color-control input[type="color"] {
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: white;
+}
+
+.debug-color-chip {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(5, 5, 5, 0.2);
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.debug-control {
+  grid-template-columns: 52px 1fr 46px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.debug-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--ink);
+}
+
+.debug-control output {
+  color: var(--ink);
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-weight: 800;
+  text-align: right;
 }
 
 .eyebrow {
@@ -977,9 +1325,14 @@ dialog::backdrop {
   }
 
   .molecule-field {
-    inset: 20% -26% auto 24%;
-    width: 112vw;
-    opacity: 0.34;
+    top: 22vh;
+    width: 124vw;
+    opacity: 0.52;
+  }
+
+  .hero-background-logo {
+    top: clamp(42px, 7vh, 72px);
+    width: min(540px, 74vw);
   }
 
   .hero-slide-card {
@@ -1020,6 +1373,20 @@ dialog::backdrop {
 }
 
 @media (max-width: 640px) {
+  .debug-toggle {
+    top: 76px;
+    right: 12px;
+  }
+
+  .debug-panel {
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    max-height: 42vh;
+  }
+
   .site-header {
     align-items: flex-start;
     flex-direction: column;
@@ -1036,8 +1403,13 @@ dialog::backdrop {
   }
 
   .molecule-field {
-    inset: 33% -46% auto 18%;
-    width: 142vw;
+    top: 25vh;
+    width: 150vw;
+  }
+
+  .hero-background-logo {
+    top: 56px;
+    width: 86vw;
   }
 
   .hero-card {

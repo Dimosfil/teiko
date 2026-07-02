@@ -9,6 +9,25 @@ const state = {
   revealObserver: null
 };
 
+const backgroundDebugDefaults = {
+  background: {
+    base: "#ffffff",
+    tint: "#eff7ee"
+  },
+  text: {
+    color: "#050505",
+    scale: 1,
+    x: 0,
+    y: 0
+  },
+  grid: {
+    color: "#48b45a",
+    scale: 1,
+    x: 0,
+    y: 0
+  }
+};
+
 const $ = (selector) => document.querySelector(selector);
 const money = (value) =>
   new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(value || 0);
@@ -221,6 +240,117 @@ function openProduct(id) {
   $("#productDialog").showModal();
 }
 
+function hexToRgb(hex) {
+  const cleanHex = hex.replace("#", "");
+  const normalized = cleanHex.length === 3
+    ? cleanHex.split("").map((char) => `${char}${char}`).join("")
+    : cleanHex;
+  const value = Number.parseInt(normalized, 16);
+  return {
+    r: (value >> 16) & 255,
+    g: (value >> 8) & 255,
+    b: value & 255
+  };
+}
+
+function rgbaFromHex(hex, alpha) {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function debugReadoutValue(prop, value) {
+  if (["base", "color", "tint"].includes(prop)) return value.toLowerCase();
+  if (prop === "scale") return Number(value).toFixed(2);
+  return `${Math.round(Number(value))}px`;
+}
+
+function updateDebugReadout(layer, prop, value) {
+  const readout = document.querySelector(`[data-debug-readout="${layer}-${prop}"]`);
+  if (readout) readout.textContent = debugReadoutValue(prop, value);
+  if (!["base", "color", "tint"].includes(prop)) return;
+  const chipName = prop === "color" ? layer : `${layer}-${prop}`;
+  const chip = document.querySelector(`[data-debug-chip="${chipName}"]`);
+  if (chip) chip.style.background = value;
+}
+
+function applyBackgroundDebugValue(layer, prop, value) {
+  const hero = $(".hero");
+  if (!hero) return;
+  if (["base", "color", "tint"].includes(prop)) {
+    const color = value.toLowerCase();
+    if (layer === "text") {
+      hero.style.setProperty("--hero-logo-color", color);
+    } else if (layer === "grid") {
+      hero.style.setProperty("--hero-grid-color", color);
+      hero.style.setProperty("--hero-link-color", color);
+      hero.style.setProperty("--hero-ring-color", color);
+      hero.style.setProperty("--hero-back-grid-a", rgbaFromHex(color, 0.14));
+      hero.style.setProperty("--hero-back-grid-b", rgbaFromHex(color, 0.08));
+    } else if (layer === "background") {
+      const cssVar = prop === "base" ? "--hero-bg-base" : "--hero-bg-tint";
+      hero.style.setProperty(cssVar, color);
+      if (prop === "base") hero.style.setProperty("--hero-back-base", color);
+    }
+    updateDebugReadout(layer, prop, color);
+    return;
+  }
+
+  const numericValue = Number(value);
+  const cssValue = prop === "scale" ? String(numericValue) : `${numericValue}px`;
+  const cssVar = layer === "text"
+    ? `--hero-logo-${prop}`
+    : `--hero-grid-${prop}`;
+  hero.style.setProperty(cssVar, cssValue);
+  updateDebugReadout(layer, prop, value);
+}
+
+function resetBackgroundDebugControls() {
+  const panel = $("#backgroundDebug");
+  if (!panel) return;
+  Object.entries(backgroundDebugDefaults).forEach(([layer, props]) => {
+    Object.entries(props).forEach(([prop, value]) => {
+      const input = panel.querySelector(`[data-debug-layer="${layer}"][data-debug-prop="${prop}"]`);
+      if (input) input.value = value;
+      applyBackgroundDebugValue(layer, prop, value);
+    });
+  });
+}
+
+function setBackgroundDebugOpen(isOpen) {
+  const panel = $("#backgroundDebug");
+  const toggle = $("#backgroundDebugToggle");
+  if (!panel || !toggle) return;
+  panel.hidden = !isOpen;
+  toggle.classList.toggle("is-active", isOpen);
+  toggle.setAttribute("aria-expanded", String(isOpen));
+}
+
+function initBackgroundDebug() {
+  const panel = $("#backgroundDebug");
+  if (!panel) return;
+  const toggle = $("#backgroundDebugToggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      setBackgroundDebugOpen(panel.hidden);
+    });
+  }
+  panel.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-debug-layer][data-debug-prop]");
+    if (!input) return;
+    applyBackgroundDebugValue(input.dataset.debugLayer, input.dataset.debugProp, input.value);
+  });
+  panel.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-debug-reset]")) return;
+    resetBackgroundDebugControls();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || panel.hidden) return;
+    setBackgroundDebugOpen(false);
+  });
+  resetBackgroundDebugControls();
+  setBackgroundDebugOpen(false);
+}
+
 function bindEvents() {
   $("#searchInput").addEventListener("input", (event) => {
     state.query = event.target.value;
@@ -273,6 +403,7 @@ async function init() {
   state.slides = data.slides.filter(isPublicSlide);
   state.products = data.products;
   renderSettings();
+  initBackgroundDebug();
   renderHeroCarousel();
   startHeroCarousel();
   renderCategories();

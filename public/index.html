@@ -20,7 +20,10 @@
     </header>
 
     <main id="top">
-      <section class="hero" aria-label="Главный экран">
+      <section class="hero hero-theme-green" aria-label="Главный экран">
+        <div class="hero-background-plane" aria-hidden="true"></div>
+        <div class="hero-background-grid" aria-hidden="true"></div>
+        <div class="hero-background-logo" aria-hidden="true"></div>
         <img class="hero-back" id="heroBack" src="/assets/logo-back.jpg" alt="" aria-hidden="true" />
         <svg class="molecule-field" viewBox="0 0 1120 360" aria-hidden="true" focusable="false">
           <g class="molecule-links">
@@ -94,6 +97,93 @@
         </div>
       </section>
     </main>
+
+    <button
+      class="debug-toggle"
+      id="backgroundDebugToggle"
+      type="button"
+      aria-controls="backgroundDebug"
+      aria-expanded="false"
+      aria-label="Toggle background settings"
+      title="Background settings"
+    >
+      BG
+    </button>
+
+    <aside class="debug-panel" id="backgroundDebug" aria-label="Background debug controls" hidden>
+      <div class="debug-panel-head">
+        <strong>BG Debug</strong>
+        <button type="button" data-debug-reset>Reset</button>
+      </div>
+      <section class="debug-layer" aria-label="Background layer controls">
+        <div class="debug-layer-title">
+          <span>Back</span>
+          <span data-debug-readout="background-base">#ffffff</span>
+        </div>
+        <label class="debug-color-control">
+          <span>White</span>
+          <input type="color" value="#ffffff" data-debug-layer="background" data-debug-prop="base" />
+          <span class="debug-color-chip" data-debug-chip="background-base"></span>
+        </label>
+        <label class="debug-color-control">
+          <span>Green</span>
+          <input type="color" value="#eff7ee" data-debug-layer="background" data-debug-prop="tint" />
+          <span class="debug-color-chip" data-debug-chip="background-tint"></span>
+        </label>
+      </section>
+      <section class="debug-layer" aria-label="Text layer controls">
+        <div class="debug-layer-title">
+          <span>Text</span>
+          <span data-debug-readout="text-color">#050505</span>
+        </div>
+        <label class="debug-color-control">
+          <span>Color</span>
+          <input type="color" value="#050505" data-debug-layer="text" data-debug-prop="color" />
+          <span class="debug-color-chip" data-debug-chip="text"></span>
+        </label>
+        <label class="debug-control">
+          <span>Scale</span>
+          <input type="range" min="0.5" max="1.8" step="0.01" value="1" data-debug-layer="text" data-debug-prop="scale" />
+          <output data-debug-readout="text-scale">1.00</output>
+        </label>
+        <label class="debug-control">
+          <span>X</span>
+          <input type="range" min="-240" max="240" step="1" value="0" data-debug-layer="text" data-debug-prop="x" />
+          <output data-debug-readout="text-x">0px</output>
+        </label>
+        <label class="debug-control">
+          <span>Y</span>
+          <input type="range" min="-180" max="180" step="1" value="0" data-debug-layer="text" data-debug-prop="y" />
+          <output data-debug-readout="text-y">0px</output>
+        </label>
+      </section>
+      <section class="debug-layer" aria-label="Grid layer controls">
+        <div class="debug-layer-title">
+          <span>Grid</span>
+          <span data-debug-readout="grid-color">#48b45a</span>
+        </div>
+        <label class="debug-color-control">
+          <span>Color</span>
+          <input type="color" value="#48b45a" data-debug-layer="grid" data-debug-prop="color" />
+          <span class="debug-color-chip" data-debug-chip="grid"></span>
+        </label>
+        <label class="debug-control">
+          <span>Scale</span>
+          <input type="range" min="0.55" max="1.9" step="0.01" value="1" data-debug-layer="grid" data-debug-prop="scale" />
+          <output data-debug-readout="grid-scale">1.00</output>
+        </label>
+        <label class="debug-control">
+          <span>X</span>
+          <input type="range" min="-280" max="280" step="1" value="0" data-debug-layer="grid" data-debug-prop="x" />
+          <output data-debug-readout="grid-x">0px</output>
+        </label>
+        <label class="debug-control">
+          <span>Y</span>
+          <input type="range" min="-220" max="220" step="1" value="0" data-debug-layer="grid" data-debug-prop="y" />
+          <output data-debug-readout="grid-y">0px</output>
+        </label>
+      </section>
+    </aside>
 
     <dialog id="productDialog">
       <div class="dialog-body" id="productDetails"></div>
