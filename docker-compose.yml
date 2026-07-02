@@ -1,0 +1,17 @@
+services:
+  teiko:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      DATA_DIR: "/app/data"
+      UPLOAD_DIR: "/app/data/uploads"
+      ADMIN_PATH: "${ADMIN_PATH:-/test-admin-teiko}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin123}"
+    volumes:
+      - teiko-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  teiko-data:

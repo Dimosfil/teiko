@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEIKO</title>
+    <meta name="description" content="TEIKO: витрина автохимии с переходом на маркетплейсы." />
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="TEIKO">
+        <img id="headerLogo" src="/assets/logo.jpg" alt="TEIKO" />
+      </a>
+      <nav>
+        <a href="#catalog">Каталог</a>
+        <a href="#about">О проекте</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-label="Главный экран">
+        <img class="hero-back" id="heroBack" src="/assets/logo-back.jpg" alt="" aria-hidden="true" />
+        <svg class="molecule-field" viewBox="0 0 1120 360" aria-hidden="true" focusable="false">
+          <g class="molecule-links">
+            <path d="M6 184 H1120" />
+            <path d="M84 184 L152 146 L224 184 L318 184 L394 132 L472 184 L558 184 L640 138 L718 184 L808 184 L880 136 L960 184 L1112 184" />
+            <path d="M224 184 L270 266 L346 266" />
+            <path d="M394 132 L420 62 L488 62" />
+            <path d="M558 184 L584 270 L664 270" />
+            <path d="M718 184 L764 108 L842 108" />
+            <path d="M960 184 L1012 276 L1090 276" />
+          </g>
+          <g class="molecule-rings">
+            <polygon points="84,138 124,160 124,208 84,230 44,208 44,160" />
+            <polygon points="224,122 278,153 278,215 224,246 170,215 170,153" />
+            <polygon points="394,78 441,105 441,159 394,186 347,159 347,105" />
+            <polygon points="488,22 525,43 525,81 488,102 451,81 451,43" />
+            <polygon points="558,132 604,158 604,210 558,236 512,210 512,158" />
+            <polygon points="718,122 772,153 772,215 718,246 664,215 664,153" />
+            <polygon points="842,58 880,80 880,124 842,146 804,124 804,80" />
+            <polygon points="960,128 1008,156 1008,212 960,240 912,212 912,156" />
+            <polygon points="1090,244 1120,261 1120,295 1090,312 1060,295 1060,261" />
+            <polygon points="346,232 376,249 376,283 346,300 316,283 316,249" />
+            <polygon points="664,236 694,253 694,287 664,304 634,287 634,253" />
+          </g>
+          <g class="molecule-small">
+            <polygon points="152,118 172,130 172,154 152,166 132,154 132,130" />
+            <polygon points="318,164 340,177 340,203 318,216 296,203 296,177" />
+            <polygon points="640,94 662,107 662,133 640,146 618,133 618,107" />
+            <polygon points="808,160 832,174 832,202 808,216 784,202 784,174" />
+            <polygon points="1012,246 1034,259 1034,285 1012,298 990,285 990,259" />
+          </g>
+        </svg>
+        <div class="hero-carousel" id="heroCarousel" aria-roledescription="carousel">
+          <div class="hero-viewport">
+            <div class="hero-track" id="heroTrack"></div>
+            <button class="hero-nav hero-nav-prev" type="button" data-hero-step="-1" aria-label="Previous slide">&lsaquo;</button>
+            <button class="hero-nav hero-nav-next" type="button" data-hero-step="1" aria-label="Next slide">&rsaquo;</button>
+          </div>
+          <div class="hero-carousel-footer">
+            <div class="hero-dots" id="heroDots"></div>
+            <div class="hero-progress" id="heroProgress" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="catalog-section" id="catalog">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Каталог</p>
+            <h2>Товары TEIKO</h2>
+          </div>
+          <label class="search">
+            <span>Поиск</span>
+            <input id="searchInput" type="search" placeholder="Название, категория, бренд" />
+          </label>
+        </div>
+        <div class="category-row" id="categories"></div>
+        <div class="product-grid" id="products"></div>
+      </section>
+
+      <section class="about" id="about">
+        <div>
+          <p class="eyebrow">О витрине</p>
+          <h2 id="aboutTitle">Без оплаты на сайте</h2>
+          <p id="aboutText">Карточки товаров ведут на внешние площадки.</p>
+        </div>
+        <div>
+          <p class="eyebrow">Покупка</p>
+          <h2 id="contactsTitle">Где купить</h2>
+          <p id="contactsText">Откройте товар и выберите маркетплейс.</p>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="productDialog">
+      <div class="dialog-body" id="productDetails"></div>
+      <button class="icon-button dialog-close" id="closeDialog" type="button" aria-label="Закрыть">x</button>
+    </dialog>
+  </body>
+</html>

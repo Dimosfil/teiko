@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEIKO | Автохимия</title>
+    <meta
+      name="description"
+      content="Адаптивная черно-белая витрина TEIKO для автохимии с RU/EN локализацией, каталогом, корзиной и оформлением заказа без платежной интеграции."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=teiko-carcare-12" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <main>
+        <section class="hero" id="heroCarousel" aria-label="TEIKO highlights">
+          <div class="hero-carousel">
+            <article class="hero-slide active" data-hero-panel="0">
+              <div class="hero-copy">
+                <img class="hero-logo" src="logo.jpg?v=teiko-carcare-12" alt="TEIKO" />
+                <p class="eyebrow" data-i18n="heroEyebrow">Автохимия и детейлинг</p>
+                <h1 data-i18n="heroTitle">TEIKO: черно-белая витрина автохимии</h1>
+                <p data-i18n="heroText">Технический каталог средств для мойки, защиты, салона, стекол, шин и зимнего ухода.</p>
+                <div class="hero-actions">
+                  <a class="primary-link" href="#catalog"><i data-lucide="shopping-bag"></i><span data-i18n="shopNow">Смотреть товары</span></a>
+                  <button class="secondary-link" type="button" id="demoOrderButton"><i data-lucide="sparkles"></i><span data-i18n="demoOrder">Быстрый демо-заказ</span></button>
+                </div>
+              </div>
+              <div class="hero-market">
+                <div class="hero-slide-head">
+                  <span data-i18n="slideCatalogKicker">Каталог</span>
+                  <strong>12</strong>
+                </div>
+                <div class="hero-slide-body">
+                  <div class="hero-can" aria-hidden="true"><i data-lucide="layout-grid"></i><span>TEIKO</span></div>
+                  <div>
+                    <span data-i18n="slideCatalogLabel">Автохимия в наличии</span>
+                    <h2 data-i18n="slideCatalogTitle">12 позиций для ухода</h2>
+                    <p data-i18n="slideCatalogText">Антидождь, салон, стекла, ароматы и наборы в одном тестовом каталоге.</p>
+                  </div>
+                </div>
+                <div class="hero-stats" aria-label="Marketplace stats">
+                  <div><strong>5</strong><span data-i18n="slideCatalogStatOne">категорий</span></div>
+                  <div><strong>24</strong><span data-i18n="delivery">доставка</span></div>
+                  <div><strong>TEIKO</strong><span data-i18n="database">файлы</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="hero-slide" data-hero-panel="1">
+              <div class="hero-copy">
+                <img class="hero-logo" src="logo.jpg?v=teiko-carcare-12" alt="TEIKO" />
+                <p class="eyebrow" data-i18n="slideKitKicker">Стартовый набор</p>
+                <h1 data-i18n="slideKitHeroTitle">Соберите уход за автомобилем за минуту</h1>
+                <p data-i18n="slideKitHeroText">Ароматы, антидождь и наборы для салона можно добавить в корзину и оформить как демо-покупку.</p>
+                <div class="hero-actions">
+                  <a class="primary-link" href="#catalog"><i data-lucide="shopping-bag"></i><span data-i18n="shopNow">Смотреть товары</span></a>
+                  <button class="secondary-link" type="button" data-demo-order><i data-lucide="sparkles"></i><span data-i18n="demoOrder">Быстрый демо-заказ</span></button>
+                </div>
+              </div>
+              <div class="hero-market">
+                <div class="hero-slide-head">
+                  <span data-i18n="slideKitKicker">Стартовый набор</span>
+                  <strong>360 ₽</strong>
+                </div>
+                <div class="hero-slide-body">
+                  <div class="hero-can" aria-hidden="true"><i data-lucide="spray-can"></i><span>TEIKO</span></div>
+                  <div>
+                    <span data-i18n="slideKitLabel">Быстрый вход в уход</span>
+                    <h2 data-i18n="slideKitTitle">От ароматов до защиты стекла</h2>
+                    <p data-i18n="slideKitText">Можно собрать демо-заказ и пройти путь покупки без платежной интеграции.</p>
+                  </div>
+                </div>
+                <div class="hero-stats">
+                  <div><strong>3</strong><span data-i18n="slideKitStatOne">товара в демо</span></div>
+                  <div><strong>0 ₽</strong><span data-i18n="slideKitStatTwo">оплата</span></div>
+                  <div><strong>local</strong><span data-i18n="database">файлы</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="hero-slide" data-hero-panel="2">
+              <div class="hero-copy">
+                <img class="hero-logo" src="logo.jpg?v=teiko-carcare-12" alt="TEIKO" />
+                <p class="eyebrow" data-i18n="slideDeliveryKicker">Доставка</p>
+                <h1 data-i18n="slideDeliveryHeroTitle">Корзина считает доставку сразу</h1>
+                <p data-i18n="slideDeliveryHeroText">Покупатель видит стоимость товаров, доставку и итог до подтверждения заказа.</p>
+                <div class="hero-actions">
+                  <a class="primary-link" href="#catalog"><i data-lucide="shopping-bag"></i><span data-i18n="shopNow">Смотреть товары</span></a>
+                  <button class="secondary-link" type="button" data-demo-order><i data-lucide="sparkles"></i><span data-i18n="demoOrder">Быстрый демо-заказ</span></button>
+                </div>
+              </div>
+              <div class="hero-market">
+                <div class="hero-slide-head">
+                  <span data-i18n="slideDeliveryKicker">Доставка</span>
+                  <strong>24</strong>
+                </div>
+                <div class="hero-slide-body">
+                  <div class="hero-can" aria-hidden="true"><i data-lucide="truck"></i><span>TEIKO</span></div>
+                  <div>
+                    <span data-i18n="slideDeliveryLabel">Условия для витрины</span>
+                    <h2 data-i18n="slideDeliveryTitle">Бесплатно от 3 000 ₽</h2>
+                    <p data-i18n="slideDeliveryText">Корзина автоматически считает доставку и итог заказа до подтверждения.</p>
+                  </div>
+                </div>
+                <div class="hero-stats">
+                  <div><strong>299 ₽</strong><span data-i18n="slideDeliveryStatOne">до порога</span></div>
+                  <div><strong>3 000 ₽</strong><span data-i18n="slideDeliveryStatTwo">порог</span></div>
+                  <div><strong>demo</strong><span data-i18n="checkout">Оформить</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="hero-slide" data-hero-panel="3">
+              <div class="hero-copy">
+                <img class="hero-logo" src="logo.jpg?v=teiko-carcare-12" alt="TEIKO" />
+                <p class="eyebrow" data-i18n="slideQualityKicker">Качество</p>
+                <h1 data-i18n="slideQualityHeroTitle">Карточки выглядят как витрина бренда</h1>
+                <p data-i18n="slideQualityHeroText">У каждой позиции есть фото, рейтинг, остаток, скидка, SKU и подробное описание.</p>
+                <div class="hero-actions">
+                  <a class="primary-link" href="#catalog"><i data-lucide="shopping-bag"></i><span data-i18n="shopNow">Смотреть товары</span></a>
+                  <button class="secondary-link" type="button" data-demo-order><i data-lucide="sparkles"></i><span data-i18n="demoOrder">Быстрый демо-заказ</span></button>
+                </div>
+              </div>
+              <div class="hero-market">
+                <div class="hero-slide-head">
+                  <span data-i18n="slideQualityKicker">Качество</span>
+                  <strong>4.8</strong>
+                </div>
+                <div class="hero-slide-body">
+                  <div class="hero-can" aria-hidden="true"><i data-lucide="badge-check"></i><span>TEIKO</span></div>
+                  <div>
+                    <span data-i18n="slideQualityLabel">Рейтинг карточек</span>
+                    <h2 data-i18n="slideQualityTitle">Товары с отзывами</h2>
+                    <p data-i18n="slideQualityText">В карточках показаны рейтинг, остаток, скидка, цена и подробное описание.</p>
+                  </div>
+                </div>
+                <div class="hero-stats">
+                  <div><strong>4.8</strong><span data-i18n="rating">рейтинг</span></div>
+                  <div><strong>-79%</strong><span data-i18n="slideQualityStatTwo">скидки</span></div>
+                  <div><strong>SKU</strong><span data-i18n="slideQualityStatThree">артикулы</span></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="hero-slide" data-hero-panel="4">
+              <div class="hero-copy">
+                <img class="hero-logo" src="logo.jpg?v=teiko-carcare-12" alt="TEIKO" />
+                <p class="eyebrow" data-i18n="slideOrderKicker">Покупка</p>
+                <h1 data-i18n="slideOrderHeroTitle">Путь до заказа без платежки</h1>
+                <p data-i18n="slideOrderHeroText">Каталог, корзина и форма оформления работают как прототип будущего магазина.</p>
+                <div class="hero-actions">
+                  <a class="primary-link" href="#catalog"><i data-lucide="shopping-bag"></i><span data-i18n="shopNow">Смотреть товары</span></a>
+                  <button class="secondary-link" type="button" data-demo-order><i data-lucide="sparkles"></i><span data-i18n="demoOrder">Быстрый демо-заказ</span></button>
+                </div>
+              </div>
+              <div class="hero-market">
+                <div class="hero-slide-head">
+                  <span data-i18n="slideOrderKicker">Покупка</span>
+                  <strong>1</strong>
+                </div>
+                <div class="hero-slide-body">
+                  <div class="hero-can" aria-hidden="true"><i data-lucide="shopping-bag"></i><span>TEIKO</span></div>
+                  <div>
+                    <span data-i18n="slideOrderLabel">Без платежки</span>
+                    <h2 data-i18n="slideOrderTitle">Заказ сохраняется в браузере</h2>
+                    <p data-i18n="slideOrderText">Покупатель проходит каталог, корзину и форму оформления до демо-подтверждения.</p>
+                  </div>
+                </div>
+                <div class="hero-stats">
+                  <div><strong>cart</strong><span data-i18n="cart">Корзина</span></div>
+                  <div><strong>form</strong><span data-i18n="checkoutTitle">Данные заказа</span></div>
+                  <div><strong>demo</strong><span data-i18n="orderCreated">Заказ создан</span></div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="hero-carousel-controls" aria-label="Hero carousel controls">
+            <button class="hero-arrow" type="button" id="heroPrev" aria-label="Previous slide"><i data-lucide="chevron-left"></i></button>
+            <div class="hero-dots" id="heroDots">
+              <button class="active" type="button" data-hero-slide="0" aria-label="Slide 1"></button>
+              <button type="button" data-hero-slide="1" aria-label="Slide 2"></button>
+              <button type="button" data-hero-slide="2" aria-label="Slide 3"></button>
+              <button type="button" data-hero-slide="3" aria-label="Slide 4"></button>
+              <button type="button" data-hero-slide="4" aria-label="Slide 5"></button>
+            </div>
+            <button class="hero-arrow" type="button" id="heroNext" aria-label="Next slide"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </section>
+
+        <nav class="category-strip" id="categoryStrip" aria-label="Product categories"></nav>
+
+        <section class="market-layout" id="catalog">
+          <aside class="filters" aria-label="Filters">
+            <div class="filter-block">
+              <div class="section-title">
+                <span data-i18n="filters">Фильтры</span>
+                <button class="text-button" type="button" id="clearFilters" data-i18n="reset">Сбросить</button>
+              </div>
+              <div class="filter-list" id="categoryFilters"></div>
+            </div>
+
+            <div class="filter-block">
+              <label class="field-label" for="sortSelect" data-i18n="sort">Сортировка</label>
+              <select id="sortSelect">
+                <option value="popular" data-i18n="sortPopular">Популярные</option>
+                <option value="priceAsc" data-i18n="sortPriceAsc">Сначала дешевле</option>
+                <option value="priceDesc" data-i18n="sortPriceDesc">Сначала дороже</option>
+                <option value="rating" data-i18n="sortRating">Высокий рейтинг</option>
+              </select>
+            </div>
+
+            <div class="filter-block">
+              <label class="check-row">
+                <input type="checkbox" id="saleOnly" />
+                <span data-i18n="saleOnly">Только со скидкой</span>
+              </label>
+              <label class="check-row">
+                <input type="checkbox" id="inStockOnly" checked />
+                <span data-i18n="inStockOnly">В наличии</span>
+              </label>
+            </div>
+          </aside>
+
+          <section class="catalog-area" aria-labelledby="catalogTitle">
+            <div class="catalog-head">
+              <div>
+                <p class="eyebrow" data-i18n="sellerLine">LimeShop36 / товары из Ozon / тестовый каталог</p>
+                <h2 id="catalogTitle" data-i18n="catalogTitle">Каталог</h2>
+              </div>
+              <div class="catalog-head-actions">
+                <span class="result-count" id="resultCount"></span>
+                <button class="icon-action" type="button" id="languageToggle" title="Language">
+                  <i data-lucide="languages"></i>
+                  <span id="languageLabel">RU</span>
+                </button>
+                <button class="cart-button" type="button" id="cartButton">
+                  <i data-lucide="shopping-cart"></i>
+                  <span data-i18n="cart">Корзина</span>
+                  <strong id="cartCount">0</strong>
+                </button>
+              </div>
+            </div>
+            <div class="product-grid" id="productGrid"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <aside class="drawer" id="cartDrawer" aria-hidden="true">
+      <div class="drawer-panel">
+        <div class="drawer-head">
+          <div>
+            <img class="drawer-logo" src="logo.jpg?v=teiko-carcare-12" alt="TEIKO" />
+            <p class="eyebrow" data-i18n="cart">Корзина</p>
+            <h2 id="drawerTitle">0 ₽</h2>
+          </div>
+          <button class="icon-only" type="button" id="closeCart" title="Close cart">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-summary">
+          <div>
+            <span data-i18n="items">Товары</span>
+            <strong id="cartSubtotal">0 ₽</strong>
+          </div>
+          <div>
+            <span data-i18n="deliveryCost">Доставка</span>
+            <strong id="deliveryPrice">0 ₽</strong>
+          </div>
+          <div class="total-line">
+            <span data-i18n="total">Итого</span>
+            <strong id="cartTotal">0 ₽</strong>
+          </div>
+        </div>
+        <button class="checkout-open" type="button" id="openCheckout">
+          <i data-lucide="credit-card"></i>
+          <span data-i18n="checkout">Оформить</span>
+        </button>
+      </div>
+    </aside>
+
+    <section class="modal" id="productModal" aria-hidden="true">
+      <div class="modal-panel product-modal-panel">
+        <button class="icon-only modal-close" type="button" id="closeProductModal" title="Close">
+          <i data-lucide="x"></i>
+        </button>
+        <div id="productModalContent"></div>
+      </div>
+    </section>
+
+    <section class="modal" id="checkoutModal" aria-hidden="true">
+      <div class="modal-panel checkout-panel">
+        <button class="icon-only modal-close" type="button" id="closeCheckout" title="Close">
+          <i data-lucide="x"></i>
+        </button>
+        <div class="checkout-grid">
+          <form class="checkout-form" id="checkoutForm">
+            <img class="checkout-logo" src="logo.jpg?v=teiko-carcare-12" alt="TEIKO" />
+            <p class="eyebrow" data-i18n="checkout">Оформить</p>
+            <h2 data-i18n="checkoutTitle">Данные заказа</h2>
+            <label>
+              <span data-i18n="name">Имя</span>
+              <input name="customerName" type="text" required />
+            </label>
+            <label>
+              <span data-i18n="phone">Телефон</span>
+              <input name="phone" type="tel" required />
+            </label>
+            <label>
+              <span>Email</span>
+              <input name="email" type="email" required />
+            </label>
+            <label>
+              <span data-i18n="address">Адрес доставки</span>
+              <textarea name="address" rows="3" required></textarea>
+            </label>
+            <div class="payment-note">
+              <i data-lucide="shield-check"></i>
+              <span data-i18n="noPayment">Оплата не подключена: заказ фиксируется как демо-покупка.</span>
+            </div>
+            <button class="place-order" type="submit">
+              <i data-lucide="check-circle-2"></i>
+              <span data-i18n="placeOrder">Подтвердить заказ</span>
+            </button>
+            <p class="form-status" id="checkoutStatus" role="status" aria-live="polite"></p>
+          </form>
+
+          <div class="checkout-aside">
+            <h3 data-i18n="orderSummary">Состав заказа</h3>
+            <div id="checkoutItems"></div>
+            <div class="total-line">
+              <span data-i18n="total">Итого</span>
+              <strong id="checkoutTotal">0 ₽</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="app.mjs?v=teiko-carcare-12" defer></script>
+  </body>
+</html>

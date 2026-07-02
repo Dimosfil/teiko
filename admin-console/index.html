@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEIKO Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="admin.js"></script>
+  </head>
+  <body class="admin-page">
+    <section class="login-box" id="loginBox">
+      <h1>TEIKO Admin</h1>
+      <p class="status">Введите пароль администратора.</p>
+      <form class="admin-form" id="loginForm">
+        <label>
+          Пароль
+          <input id="passwordInput" type="password" autocomplete="current-password" required />
+        </label>
+        <button class="button primary" type="submit">Войти</button>
+      </form>
+    </section>
+
+    <main class="admin-shell hidden" id="adminShell">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">TEIKO</p>
+          <h1>Управление витриной</h1>
+        </div>
+        <a class="button secondary" href="/" target="_blank" rel="noreferrer">Открыть сайт</a>
+      </header>
+
+      <div class="admin-grid">
+        <aside class="panel">
+          <h2 id="formTitle">Настройки сайта</h2>
+          <form class="admin-form" id="editorForm"></form>
+          <p class="status" id="status"></p>
+        </aside>
+
+        <section class="panel">
+          <div class="admin-toolbar">
+            <div class="tabs">
+              <button class="active" type="button" data-tab="settings">Шапка</button>
+              <button type="button" data-tab="slides">Слайды</button>
+              <button type="button" data-tab="products">Товары</button>
+            </div>
+            <button class="button primary hidden" id="newButton" type="button">Добавить</button>
+          </div>
+          <div class="admin-list" id="adminList"></div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
