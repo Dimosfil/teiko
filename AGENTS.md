@@ -173,6 +173,11 @@ Inspect logs:
   unrelated scope expansion.
 - Treat this project root as the filesystem boundary for normal work unless the
   user gives an explicit concrete path and action.
+- Before filesystem writes, verify the active project root and target identity
+  from local instructions, README, manifests, git remote, service id, or project
+  memory. If the task appears to target a different product, repository, or
+  absolute path outside this root, stop and warn the user unless the current
+  message explicitly authorizes that exact external path and action.
 - Preserve text encodings when editing files.
 - On Windows, never send non-ASCII JSON or form text through PowerShell
   `Invoke-RestMethod` / `Invoke-WebRequest` as a plain `-Body` string unless the

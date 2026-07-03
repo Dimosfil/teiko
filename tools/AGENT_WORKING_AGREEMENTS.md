@@ -10,6 +10,12 @@
   project or arbitrary external folder unless the user gives an explicit
   concrete path and action. Use APIs, connectors, or task-manager endpoints for
   cross-project communication.
+- Before filesystem writes, verify that the active project root and target
+  identity match the user's current request. Use local identity signals such as
+  local instructions, README, manifests, service id, git remote, and project
+  memory. If the request appears to target another product, repository, or
+  absolute path outside this root, stop and warn the user unless the current
+  message explicitly authorizes that exact external path and action.
 - Treat nested checkouts, vendored repositories, cloned examples, and
   third-party source trees as separate scope. Do not inspect them as part of the
   main project unless the user explicitly asks, the task is about that nested

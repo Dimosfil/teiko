@@ -17,6 +17,12 @@ For `gi restart`, `gi reboot`, `ги рестарт`, `ги ребут`, and equ
 read `patterns/AGENTS_RUNTIME/09-project-operation-commands.md` before any
 process inspection, stop, start, or success report.
 
+Before any `gi` command writes files, agents must verify that the active project
+root and target identity match the current request. If the request appears to
+target another product, repository, or absolute path outside the current root,
+stop and warn the user unless the current message explicitly authorizes that
+exact external path and action.
+
 ## Команды Для Чата С Агентом
 
 Префикс `gi` — короткая команда для локального instruction kit. Не
