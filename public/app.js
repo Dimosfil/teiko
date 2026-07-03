@@ -6,6 +6,7 @@ const state = {
   query: "",
   activeSlide: 0,
   slideTimer: 0,
+  isHeroPaused: false,
   revealObserver: null
 };
 
@@ -13,6 +14,10 @@ const backgroundDebugDefaults = {
   background: {
     base: "#ffffff",
     tint: "#eff7ee"
+  },
+  glass: {
+    alpha: 0.46,
+    blur: 18
   },
   text: {
     color: "#050505",
@@ -27,6 +32,8 @@ const backgroundDebugDefaults = {
     y: 0
   }
 };
+
+const backgroundDebugStorageKey = "teiko-background-debug-settings";
 
 const $ = (selector) => document.querySelector(selector);
 const money = (value) =>
@@ -77,7 +84,25 @@ function renderSettings() {
   setText("contactsText", state.settings.contactsText);
 }
 
+function transparentHeroSlide() {
+  return {
+    id: "transparent-background-slide",
+    isTransparent: true
+  };
+}
+
+function buildHeroSlides(slides) {
+  return [...slides, transparentHeroSlide()];
+}
+
 function heroSlideCard(slide, index) {
+  if (slide.isTransparent) {
+    return `
+      <article class="hero-slide-card hero-slide-transparent" aria-roledescription="slide" aria-label="Slide ${index + 1}">
+        <div class="hero-card is-transparent" aria-hidden="true"></div>
+      </article>
+    `;
+  }
   const cta = slide.ctaLabel && isPublicHref(slide.ctaHref)
     ? `<a class="button primary" href="${slide.ctaHref}">${slide.ctaLabel}</a>`
     : "";
@@ -117,9 +142,12 @@ function renderHeroPosition() {
       `
     )
     .join("");
+  updateHeroPauseButton();
   const progress = $("#heroProgress");
   if (progress) {
     progress.classList.remove("is-running");
+    progress.classList.toggle("is-paused", state.isHeroPaused);
+    if (state.isHeroPaused) return;
     void progress.offsetWidth;
     progress.classList.add("is-running");
   }
@@ -140,8 +168,38 @@ function setActiveSlide(index) {
 
 function startHeroCarousel() {
   window.clearInterval(state.slideTimer);
+  if (state.isHeroPaused) {
+    renderHeroPosition();
+    return;
+  }
   if (state.slides.length < 2) return;
   state.slideTimer = window.setInterval(() => setActiveSlide(state.activeSlide + 1), 5200);
+}
+
+function pauseHeroCarousel() {
+  state.isHeroPaused = true;
+  window.clearInterval(state.slideTimer);
+  renderHeroPosition();
+}
+
+function resumeHeroCarousel() {
+  state.isHeroPaused = false;
+  startHeroCarousel();
+}
+
+function toggleHeroCarouselPause() {
+  if (state.isHeroPaused) {
+    resumeHeroCarousel();
+  } else {
+    pauseHeroCarousel();
+  }
+}
+
+function updateHeroPauseButton() {
+  const button = $("#heroPause");
+  if (!button) return;
+  button.textContent = state.isHeroPaused ? "Play" : "Pause";
+  button.setAttribute("aria-pressed", String(state.isHeroPaused));
 }
 
 function renderCategories() {
@@ -260,6 +318,7 @@ function rgbaFromHex(hex, alpha) {
 
 function debugReadoutValue(prop, value) {
   if (["base", "color", "tint"].includes(prop)) return value.toLowerCase();
+  if (prop === "alpha") return Number(value).toFixed(2);
   if (prop === "scale") return Number(value).toFixed(2);
   return `${Math.round(Number(value))}px`;
 }
@@ -273,8 +332,22 @@ function updateDebugReadout(layer, prop, value) {
   if (chip) chip.style.background = value;
 }
 
+function setDebugSaveStatus(message) {
+  const status = document.querySelector("[data-debug-save-status]");
+  if (status) status.textContent = message;
+}
+
 function applyBackgroundDebugValue(layer, prop, value) {
   const hero = $(".hero");
+  const catalogPanel = $(".catalog-panel");
+  if (layer === "glass") {
+    if (!catalogPanel) return;
+    const numericValue = Number(value);
+    const cssValue = prop === "blur" ? `${numericValue}px` : String(numericValue);
+    catalogPanel.style.setProperty(`--catalog-glass-${prop}`, cssValue);
+    updateDebugReadout(layer, prop, value);
+    return;
+  }
   if (!hero) return;
   if (["base", "color", "tint"].includes(prop)) {
     const color = value.toLowerCase();
@@ -304,16 +377,68 @@ function applyBackgroundDebugValue(layer, prop, value) {
   updateDebugReadout(layer, prop, value);
 }
 
-function resetBackgroundDebugControls() {
+function collectBackgroundDebugControls(panel) {
+  return Object.fromEntries(
+    Object.entries(backgroundDebugDefaults).map(([layer, props]) => [
+      layer,
+      Object.fromEntries(
+        Object.keys(props).map((prop) => {
+          const input = panel.querySelector(`[data-debug-layer="${layer}"][data-debug-prop="${prop}"]`);
+          return [prop, input ? input.value : props[prop]];
+        })
+      )
+    ])
+  );
+}
+
+function normalizeBackgroundDebugPreset(input) {
+  const preset = JSON.parse(JSON.stringify(backgroundDebugDefaults));
+  if (!input || typeof input !== "object") return preset;
+  Object.entries(backgroundDebugDefaults).forEach(([layer, props]) => {
+    if (!input[layer] || typeof input[layer] !== "object") return;
+    Object.keys(props).forEach((prop) => {
+      if (input[layer][prop] !== undefined) preset[layer][prop] = input[layer][prop];
+    });
+  });
+  return preset;
+}
+
+function loadSavedBackgroundDebugControls() {
+  try {
+    const saved = localStorage.getItem(backgroundDebugStorageKey);
+    return saved ? normalizeBackgroundDebugPreset(JSON.parse(saved)) : normalizeBackgroundDebugPreset();
+  } catch {
+    return normalizeBackgroundDebugPreset();
+  }
+}
+
+function saveBackgroundDebugControls() {
   const panel = $("#backgroundDebug");
   if (!panel) return;
-  Object.entries(backgroundDebugDefaults).forEach(([layer, props]) => {
+  const preset = collectBackgroundDebugControls(panel);
+  try {
+    localStorage.setItem(backgroundDebugStorageKey, JSON.stringify(preset));
+    setDebugSaveStatus("Saved.");
+  } catch {
+    setDebugSaveStatus("Save failed.");
+  }
+}
+
+function applyBackgroundDebugControls(preset) {
+  const panel = $("#backgroundDebug");
+  if (!panel) return;
+  Object.entries(normalizeBackgroundDebugPreset(preset)).forEach(([layer, props]) => {
     Object.entries(props).forEach(([prop, value]) => {
       const input = panel.querySelector(`[data-debug-layer="${layer}"][data-debug-prop="${prop}"]`);
       if (input) input.value = value;
       applyBackgroundDebugValue(layer, prop, value);
     });
   });
+}
+
+function resetBackgroundDebugControls() {
+  applyBackgroundDebugControls(backgroundDebugDefaults);
+  setDebugSaveStatus("Reset preview. Save to keep.");
 }
 
 function setBackgroundDebugOpen(isOpen) {
@@ -338,16 +463,22 @@ function initBackgroundDebug() {
     const input = event.target.closest("[data-debug-layer][data-debug-prop]");
     if (!input) return;
     applyBackgroundDebugValue(input.dataset.debugLayer, input.dataset.debugProp, input.value);
+    setDebugSaveStatus("");
   });
   panel.addEventListener("click", (event) => {
-    if (!event.target.closest("[data-debug-reset]")) return;
-    resetBackgroundDebugControls();
+    if (event.target.closest("[data-debug-save]")) {
+      saveBackgroundDebugControls();
+      return;
+    }
+    if (event.target.closest("[data-debug-reset]")) {
+      resetBackgroundDebugControls();
+    }
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || panel.hidden) return;
     setBackgroundDebugOpen(false);
   });
-  resetBackgroundDebugControls();
+  applyBackgroundDebugControls(loadSavedBackgroundDebugControls());
   setBackgroundDebugOpen(false);
 }
 
@@ -362,6 +493,7 @@ function bindEvents() {
     const product = event.target.closest("[data-product]");
     const heroStep = event.target.closest("[data-hero-step]");
     const heroSlide = event.target.closest("[data-hero-slide]");
+    const heroPause = event.target.closest("#heroPause");
     if (category) {
       state.category = category.dataset.category;
       renderCategories();
@@ -369,6 +501,7 @@ function bindEvents() {
       refreshReveal();
     }
     if (product) openProduct(product.dataset.product);
+    if (heroPause) toggleHeroCarouselPause();
     if (heroStep) {
       setActiveSlide(state.activeSlide + Number(heroStep.dataset.heroStep));
       startHeroCarousel();
@@ -400,7 +533,7 @@ async function init() {
   const response = await fetch("/api/storefront", { cache: "no-store" });
   const data = await response.json();
   state.settings = data.settings;
-  state.slides = data.slides.filter(isPublicSlide);
+  state.slides = buildHeroSlides(data.slides.filter(isPublicSlide));
   state.products = data.products;
   renderSettings();
   initBackgroundDebug();

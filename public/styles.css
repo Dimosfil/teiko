@@ -502,6 +502,19 @@ img {
   display: none;
 }
 
+.hero-card.is-transparent {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.hero-card.is-transparent::before,
+.hero-card.is-transparent::after {
+  display: none;
+}
+
 .hero-card-copy {
   position: relative;
   z-index: 3;
@@ -538,6 +551,14 @@ img {
   gap: 8px;
 }
 
+.hero-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 clamp(22px, 5vw, 72px);
+}
+
 .hero-dots button {
   width: 34px;
   height: 5px;
@@ -549,6 +570,25 @@ img {
 
 .hero-dots button.active {
   background: var(--ink);
+}
+
+.hero-pause {
+  min-width: 64px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(5, 5, 5, 0.16);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.hero-pause[aria-pressed="true"] {
+  background: var(--ink);
+  color: white;
 }
 
 .hero-progress {
@@ -576,6 +616,10 @@ img {
 
 .hero-progress.is-running::after {
   animation: hero-progress 5200ms linear forwards;
+}
+
+.hero-progress.is-paused::after {
+  animation: none;
 }
 
 @keyframes hero-progress {
@@ -646,6 +690,11 @@ img {
   grid-template-columns: 1fr auto;
 }
 
+.debug-panel-actions {
+  display: flex;
+  gap: 6px;
+}
+
 .debug-panel-head strong {
   font-size: 12px;
   letter-spacing: 0;
@@ -659,6 +708,19 @@ img {
   border-radius: var(--radius);
   background: white;
   color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.debug-panel-head button[data-debug-save] {
+  background: var(--ink);
+  color: white;
+}
+
+.debug-save-status {
+  grid-column: 1 / -1;
+  min-height: 14px;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 800;
 }
@@ -849,6 +911,27 @@ h1 {
   padding: 36px 0 72px;
 }
 
+.catalog-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  --catalog-glass-alpha: 0.46;
+  --catalog-glass-blur: 18px;
+  padding: clamp(22px, 3.2vw, 38px);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: calc(var(--radius) + 2px);
+  background: rgba(255, 255, 255, var(--catalog-glass-alpha));
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(var(--catalog-glass-blur)) saturate(1.08);
+  -webkit-backdrop-filter: blur(var(--catalog-glass-blur)) saturate(1.08);
+}
+
+.catalog-panel::before {
+  display: none;
+}
+
 .section-head {
   justify-content: space-between;
   gap: 24px;
@@ -887,6 +970,14 @@ h1 {
   outline: 0;
 }
 
+.catalog-panel .search input {
+  border-color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 .search input:focus,
 .admin-form input:focus,
 .admin-form textarea:focus {
@@ -911,6 +1002,14 @@ h1 {
     color 180ms ease;
 }
 
+.catalog-panel .category-row button {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.64);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 .category-row button:hover {
   transform: translateY(-2px);
 }
@@ -918,6 +1017,11 @@ h1 {
 .category-row button.active {
   background: var(--ink);
   color: white;
+}
+
+.catalog-panel .category-row button.active {
+  border-color: var(--ink);
+  background: var(--ink);
 }
 
 .product-grid {
@@ -930,9 +1034,12 @@ h1 {
   display: grid;
   grid-template-rows: 250px 1fr;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.62);
   border-radius: var(--radius);
-  background: white;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transform: translateY(0);
   transition:
     transform 240ms ease,
@@ -949,7 +1056,7 @@ h1 {
 .product-image {
   width: 100%;
   border: 0;
-  background: var(--accent-soft);
+  background: rgba(236, 235, 231, 0.74);
 }
 
 .product-image img {

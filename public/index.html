@@ -63,25 +63,30 @@
             <button class="hero-nav hero-nav-next" type="button" data-hero-step="1" aria-label="Next slide">&rsaquo;</button>
           </div>
           <div class="hero-carousel-footer">
-            <div class="hero-dots" id="heroDots"></div>
+            <div class="hero-controls">
+              <div class="hero-dots" id="heroDots"></div>
+              <button class="hero-pause" id="heroPause" type="button" aria-pressed="false">Pause</button>
+            </div>
             <div class="hero-progress" id="heroProgress" aria-hidden="true"></div>
           </div>
         </div>
       </section>
 
       <section class="catalog-section" id="catalog">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Каталог</p>
-            <h2>Товары TEIKO</h2>
+        <div class="catalog-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Каталог</p>
+              <h2>Товары TEIKO</h2>
+            </div>
+            <label class="search">
+              <span>Поиск</span>
+              <input id="searchInput" type="search" placeholder="Название, категория, бренд" />
+            </label>
           </div>
-          <label class="search">
-            <span>Поиск</span>
-            <input id="searchInput" type="search" placeholder="Название, категория, бренд" />
-          </label>
+          <div class="category-row" id="categories"></div>
+          <div class="product-grid" id="products"></div>
         </div>
-        <div class="category-row" id="categories"></div>
-        <div class="product-grid" id="products"></div>
       </section>
 
       <section class="about" id="about">
@@ -113,7 +118,11 @@
     <aside class="debug-panel" id="backgroundDebug" aria-label="Background debug controls" hidden>
       <div class="debug-panel-head">
         <strong>BG Debug</strong>
-        <button type="button" data-debug-reset>Reset</button>
+        <div class="debug-panel-actions">
+          <button type="button" data-debug-save>Save</button>
+          <button type="button" data-debug-reset>Reset</button>
+        </div>
+        <span class="debug-save-status" data-debug-save-status aria-live="polite"></span>
       </div>
       <section class="debug-layer" aria-label="Background layer controls">
         <div class="debug-layer-title">
@@ -129,6 +138,22 @@
           <span>Green</span>
           <input type="color" value="#eff7ee" data-debug-layer="background" data-debug-prop="tint" />
           <span class="debug-color-chip" data-debug-chip="background-tint"></span>
+        </label>
+      </section>
+      <section class="debug-layer" aria-label="Glass layer controls">
+        <div class="debug-layer-title">
+          <span>Glass</span>
+          <span>Panel</span>
+        </div>
+        <label class="debug-control">
+          <span>Alpha</span>
+          <input type="range" min="0.08" max="0.82" step="0.01" value="0.46" data-debug-layer="glass" data-debug-prop="alpha" />
+          <output data-debug-readout="glass-alpha">0.46</output>
+        </label>
+        <label class="debug-control">
+          <span>Blur</span>
+          <input type="range" min="0" max="36" step="1" value="18" data-debug-layer="glass" data-debug-prop="blur" />
+          <output data-debug-readout="glass-blur">18px</output>
         </label>
       </section>
       <section class="debug-layer" aria-label="Text layer controls">
