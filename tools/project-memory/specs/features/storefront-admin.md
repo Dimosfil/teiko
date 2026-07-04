@@ -64,11 +64,14 @@ Wildberries, Yandex Market, or another configured URL.
 - Admin API requires the configured admin password.
 - The public storefront must not link to the admin path.
 - Uploaded images are product/site assets, not project memory.
-- Hero debug settings are project-file-backed preview controls. Back, Glass, Text,
-  Grid, carousel transform, carousel visible-card count and gap, catalog panel
-  transform, info/about transform, selected hero layout, slide color/mono tone,
-  carousel motion mode, Text contour-glint motion on/off mode, Grid motion
-  on/off mode, and the drag-reordered debug menu section order are previewed
-  immediately but become durable only when the debug panel `Save` button writes
-  them to `public/visual-settings.json` through the local backend. The JSON file
-  is the source of truth for git commits and FTP uploads.
+- Hero debug settings are project-file-backed preview controls. Back, Glass,
+  Text, Grid, carousel transform, carousel visible-card count and gap, catalog
+  panel transform, info/about transform, selected hero layout, slide color/mono
+  tone, carousel motion mode, Text contour-glint motion on/off mode, Grid
+  motion on/off mode, and the drag-reordered debug menu section order are
+  previewed immediately. They become durable when the debug panel writes a named
+  preset through the local backend. `public/visual-settings/index.json` stores
+  the active preset and preset list; each preset lives as
+  `public/visual-settings/<preset-id>.json`. `public/visual-settings.json`
+  remains a backward-compatible default fallback only. The preset folder is the
+  source of truth for git commits and FTP uploads.

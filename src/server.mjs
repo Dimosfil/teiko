@@ -25,8 +25,12 @@ const publicDir = path.resolve("public");
 const adminDir = path.resolve("admin-console");
 const uploadDir = path.resolve(process.env.UPLOAD_DIR || path.join(publicDir, "uploads"));
 const visualSettingsPath = path.join(publicDir, "visual-settings.json");
+const visualSettingsDir = path.join(publicDir, "visual-settings");
+const visualSettingsIndexPath = path.join(visualSettingsDir, "index.json");
+const defaultVisualSettingsPreset = { id: "default", name: "Default" };
 
 fs.mkdirSync(uploadDir, { recursive: true });
+fs.mkdirSync(visualSettingsDir, { recursive: true });
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -70,23 +74,154 @@ function normalizeSpecs(value) {
   }
 }
 
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static(uploadDir));
-app.use(express.static(publicDir));
+function readJsonFile(filePath, fallback) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return fallback;
+  }
+}
 
-app.put("/api/visual-settings", (req, res) => {
+function normalizePresetId(value, fallback = "") {
+  const id = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  return id || fallback || `preset-${Date.now()}`;
+}
+
+function presetPath(id) {
+  return path.join(visualSettingsDir, `${normalizePresetId(id, defaultVisualSettingsPreset.id)}.json`);
+}
+
+function readVisualSettingsIndex() {
+  const index = readJsonFile(visualSettingsIndexPath, null);
+  const presets = Array.isArray(index?.presets) ? index.presets : [];
+  const normalizedPresets = [
+    defaultVisualSettingsPreset,
+    ...presets
+      .map((preset) => ({
+        id: normalizePresetId(preset.id || preset.name),
+        name: String(preset.name || preset.id || "").trim()
+      }))
+      .filter((preset) => preset.id && preset.id !== defaultVisualSettingsPreset.id)
+  ];
+  const uniquePresets = normalizedPresets.filter(
+    (preset, index, list) => list.findIndex((item) => item.id === preset.id) === index
+  );
+  return {
+    activePreset: normalizePresetId(index?.activePreset, defaultVisualSettingsPreset.id),
+    presets: uniquePresets.map((preset) => ({
+      id: preset.id,
+      name: preset.name || preset.id
+    }))
+  };
+}
+
+function writeVisualSettingsIndex(index) {
+  fs.writeFileSync(visualSettingsIndexPath, `${JSON.stringify(index, null, 2)}\n`, "utf8");
+}
+
+function readVisualSettingsPreset(id) {
+  const safeId = normalizePresetId(id, defaultVisualSettingsPreset.id);
+  const preset = readJsonFile(presetPath(safeId), null);
+  if (preset) return preset;
+  if (safeId === defaultVisualSettingsPreset.id) {
+    return readJsonFile(visualSettingsPath, {});
+  }
+  return {};
+}
+
+function writeVisualSettingsPreset(id, name, settings) {
+  const safeId = normalizePresetId(id || name, defaultVisualSettingsPreset.id);
+  const index = readVisualSettingsIndex();
+  const existing = index.presets.find((preset) => preset.id === safeId);
+  const presetName = String(name || existing?.name || safeId).trim() || safeId;
+  const nextPresets = [
+    ...index.presets.filter((preset) => preset.id !== safeId),
+    { id: safeId, name: presetName }
+  ].sort((a, b) => (a.id === defaultVisualSettingsPreset.id ? -1 : b.id === defaultVisualSettingsPreset.id ? 1 : a.name.localeCompare(b.name)));
+  const nextIndex = { activePreset: safeId, presets: nextPresets };
+  fs.writeFileSync(presetPath(safeId), `${JSON.stringify(settings, null, 2)}\n`, "utf8");
+  if (safeId === defaultVisualSettingsPreset.id) {
+    fs.writeFileSync(visualSettingsPath, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
+  }
+  writeVisualSettingsIndex(nextIndex);
+  return { id: safeId, name: presetName, index: nextIndex, settings };
+}
+
+function visualSettingsPayload(req) {
+  const settings = req.body?.settings || req.body;
+  if (!settings || typeof settings !== "object" || Array.isArray(settings)) {
+    return null;
+  }
+  return settings;
+}
+
+function canWriteVisualSettings(res) {
   if (process.env.NODE_ENV === "production" && process.env.VISUAL_SETTINGS_WRITE !== "1") {
     res.status(403).json({ error: "Visual settings write is disabled in production" });
-    return;
+    return false;
   }
-  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+  return true;
+}
+
+function saveVisualSettingsRequest(req, res, presetId = req.body?.id || defaultVisualSettingsPreset.id) {
+  if (!canWriteVisualSettings(res)) return;
+  const settings = visualSettingsPayload(req);
+  if (!settings) {
     res.status(400).json({ error: "Visual settings payload must be an object" });
     return;
   }
-  fs.writeFileSync(visualSettingsPath, `${JSON.stringify(req.body, null, 2)}\n`, "utf8");
-  res.json(req.body);
+  const result = writeVisualSettingsPreset(presetId, req.body?.name, settings);
+  res.json(result);
+}
+
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/api/visual-settings", (_req, res) => {
+  const index = readVisualSettingsIndex();
+  res.json({
+    ...index,
+    settings: readVisualSettingsPreset(index.activePreset)
+  });
 });
+
+app.put("/api/visual-settings", (req, res) => {
+  saveVisualSettingsRequest(req, res, req.body?.id || defaultVisualSettingsPreset.id);
+});
+
+app.post("/api/visual-settings", (req, res) => {
+  saveVisualSettingsRequest(req, res, req.body?.id || defaultVisualSettingsPreset.id);
+});
+
+app.get("/api/visual-settings/:presetId", (req, res) => {
+  res.json(readVisualSettingsPreset(req.params.presetId));
+});
+
+app.put("/api/visual-settings/:presetId", (req, res) => {
+  saveVisualSettingsRequest(req, res, req.params.presetId);
+});
+
+app.post("/api/visual-settings/:presetId", (req, res) => {
+  saveVisualSettingsRequest(req, res, req.params.presetId);
+});
+
+app.put("/visual-settings/:presetFile", (req, res) => {
+  const presetId = String(req.params.presetFile || "").replace(/\.json$/i, "");
+  saveVisualSettingsRequest(req, res, presetId);
+});
+
+app.post("/visual-settings/:presetFile", (req, res) => {
+  const presetId = String(req.params.presetFile || "").replace(/\.json$/i, "");
+  saveVisualSettingsRequest(req, res, presetId);
+});
+
+app.use("/uploads", express.static(uploadDir));
+app.use(express.static(publicDir));
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "teiko-showcase" });

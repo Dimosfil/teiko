@@ -1,0 +1,9 @@
+﻿{
+  "activePreset": "default",
+  "presets": [
+    {
+      "id": "default",
+      "name": "Default"
+    }
+  ]
+}

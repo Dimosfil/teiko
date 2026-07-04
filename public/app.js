@@ -22,6 +22,8 @@ const state = {
   heroCarouselCards: 5,
   heroTransitionTimer: 0,
   rimPulseTimer: 0,
+  visualPresets: [{ id: "default", name: "Default" }],
+  currentVisualPreset: "default",
   revealObserver: null
 };
 
@@ -52,7 +54,8 @@ const backgroundDebugDefaults = {
     y: 0
   },
   text: {
-    color: "#050505",
+    colorLight: "#050505",
+    colorDark: "#ffffff",
     scale: 1,
     frequency: 1,
     repeat: 1,
@@ -67,8 +70,13 @@ const backgroundDebugDefaults = {
   }
 };
 
-const visualSettingsPath = "/visual-settings.json";
+const visualSettingsPath = "/visual-settings/default.json";
+const visualSettingsLegacyPath = "/visual-settings.json";
+const visualSettingsIndexPath = "/visual-settings/index.json";
 const visualSettingsApiPath = "/api/visual-settings";
+const storefrontStaticPath = "/storefront.json";
+const visualSettingsStorageKey = "teiko.visualSettings.v1";
+const defaultVisualPreset = { id: "default", name: "Default" };
 const heroSlideDelay = 5200;
 const debugSectionDefaultOrder = ["mode", "background", "text", "grid", "carousel", "glass", "catalog", "info"];
 const textHighlightVariants = ["knife", "soft", "split", "edge", "wipe"];
@@ -77,6 +85,14 @@ const gridVariants = ["original", "dense", "wave"];
 const $ = (selector) => document.querySelector(selector);
 const money = (value) =>
   new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(value || 0);
+const escapeHtml = (value) =>
+  String(value || "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[char]);
 
 function setText(id, value) {
   const node = document.getElementById(id);
@@ -728,7 +744,7 @@ function rgbaFromHex(hex, alpha) {
 }
 
 function debugReadoutValue(prop, value) {
-  if (["base", "color", "tint"].includes(prop)) return value.toLowerCase();
+  if (["base", "color", "colorLight", "colorDark", "tint"].includes(prop)) return value.toLowerCase();
   if (prop === "cards") return String(carouselCardCount(value));
   if (prop === "gap") return `${carouselGapValue(value)}px`;
   if (prop === "frequency") return `${rimFrequencyValue(value).toFixed(2)}x`;
@@ -741,7 +757,7 @@ function debugReadoutValue(prop, value) {
 function updateDebugReadout(layer, prop, value) {
   const readout = document.querySelector(`[data-debug-readout="${layer}-${prop}"]`);
   if (readout) readout.textContent = debugReadoutValue(prop, value);
-  if (!["base", "color", "tint"].includes(prop)) return;
+  if (!["base", "color", "colorLight", "colorDark", "tint"].includes(prop)) return;
   const chipName = prop === "color" ? layer : `${layer}-${prop}`;
   const chip = document.querySelector(`[data-debug-chip="${chipName}"]`);
   if (chip) chip.style.background = value;
@@ -794,10 +810,12 @@ function applyBackgroundDebugValue(layer, prop, value) {
     return;
   }
   if (!hero) return;
-  if (["base", "color", "tint"].includes(prop)) {
+  if (["base", "color", "colorLight", "colorDark", "tint"].includes(prop)) {
     const color = value.toLowerCase();
     if (layer === "text") {
-      hero.style.setProperty("--hero-logo-color", color);
+      const cssVar = prop === "colorDark" ? "--hero-logo-color-dark" : "--hero-logo-color-light";
+      hero.style.setProperty(cssVar, color);
+      if (prop === "color" || prop === "colorLight") hero.style.setProperty("--hero-logo-color", color);
     } else if (layer === "grid") {
       hero.style.setProperty("--hero-grid-color", color);
       hero.style.setProperty("--hero-link-color", color);
@@ -852,6 +870,15 @@ function collectBackgroundDebugControls(panel) {
 function normalizeBackgroundDebugPreset(input) {
   const preset = JSON.parse(JSON.stringify(backgroundDebugDefaults));
   if (!input || typeof input !== "object") return preset;
+  if (input.text && typeof input.text === "object" && input.text.color !== undefined && input.text.colorLight === undefined) {
+    input = {
+      ...input,
+      text: {
+        ...input.text,
+        colorLight: input.text.color
+      }
+    };
+  }
   Object.entries(backgroundDebugDefaults).forEach(([layer, props]) => {
     if (!input[layer] || typeof input[layer] !== "object") return;
     Object.keys(props).forEach((prop) => {
@@ -887,6 +914,113 @@ function applyDebugSectionOrder(order) {
   });
 }
 
+function normalizePresetId(value, fallback = "") {
+  const id = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  return id || fallback || `preset-${Date.now()}`;
+}
+
+function normalizePresetName(value, fallback = "Preset") {
+  return String(value || "").trim().slice(0, 48) || fallback;
+}
+
+function uniquePresetId(baseId) {
+  const safeBase = normalizePresetId(baseId, "preset");
+  let candidate = safeBase;
+  let suffix = 2;
+  while (state.visualPresets.some((preset) => preset.id === candidate)) {
+    candidate = `${safeBase}-${suffix}`;
+    suffix += 1;
+  }
+  return candidate;
+}
+
+function normalizePresetList(index = {}) {
+  const incoming = Array.isArray(index.presets) ? index.presets : [];
+  const presets = [
+    defaultVisualPreset,
+    ...incoming
+      .map((preset) => ({
+        id: normalizePresetId(preset.id || preset.name),
+        name: normalizePresetName(preset.name || preset.id, preset.id || "Preset")
+      }))
+      .filter((preset) => preset.id && preset.id !== defaultVisualPreset.id)
+  ];
+  return presets.filter((preset, index, list) => list.findIndex((item) => item.id === preset.id) === index);
+}
+
+function setVisualPresets(index = {}) {
+  state.visualPresets = normalizePresetList(index);
+  const activePreset = normalizePresetId(index.activePreset, defaultVisualPreset.id);
+  state.currentVisualPreset = state.visualPresets.some((preset) => preset.id === activePreset)
+    ? activePreset
+    : defaultVisualPreset.id;
+  renderVisualPresetControls();
+}
+
+function readStoredVisualSettings() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(visualSettingsStorageKey) || "null");
+    if (!stored || typeof stored !== "object") return null;
+    const presets = normalizePresetList(stored.index || stored);
+    const activePreset = normalizePresetId(stored.index?.activePreset || stored.activePreset, defaultVisualPreset.id);
+    const settingsByPreset = stored.settingsByPreset && typeof stored.settingsByPreset === "object"
+      ? stored.settingsByPreset
+      : {};
+    return { index: { activePreset, presets }, settingsByPreset };
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredVisualSettings(index, settingsByPreset) {
+  localStorage.setItem(visualSettingsStorageKey, JSON.stringify({ index, settingsByPreset }));
+}
+
+function storeVisualSettings(settings, preset = currentVisualPreset()) {
+  const stored = readStoredVisualSettings();
+  const presetId = normalizePresetId(preset.id, defaultVisualPreset.id);
+  const presetName = normalizePresetName(preset.name, presetId);
+  const presets = normalizePresetList({
+    presets: [
+      ...(stored?.index.presets || state.visualPresets),
+      { id: presetId, name: presetName }
+    ]
+  });
+  const index = { activePreset: presetId, presets };
+  const settingsByPreset = {
+    ...(stored?.settingsByPreset || {}),
+    [presetId]: normalizeVisualSettings(settings)
+  };
+  writeStoredVisualSettings(index, settingsByPreset);
+  setVisualPresets(index);
+  state.currentVisualPreset = presetId;
+  renderVisualPresetControls();
+  return settingsByPreset[presetId];
+}
+
+function currentVisualPreset() {
+  return state.visualPresets.find((preset) => preset.id === state.currentVisualPreset) || defaultVisualPreset;
+}
+
+function renderVisualPresetControls() {
+  const select = document.querySelector("[data-debug-preset-select]");
+  const nameInput = document.querySelector("[data-debug-preset-name]");
+  const current = document.querySelector("[data-debug-preset-current]");
+  const preset = currentVisualPreset();
+  if (select) {
+    select.innerHTML = state.visualPresets
+      .map((item) => `<option value="${item.id}" ${item.id === preset.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`)
+      .join("");
+  }
+  if (nameInput) nameInput.value = preset.name;
+  if (current) current.textContent = preset.name;
+}
+
 function normalizeVisualSettings(input = {}) {
   return {
     debug: normalizeBackgroundDebugPreset(input.debug),
@@ -902,13 +1036,60 @@ function normalizeVisualSettings(input = {}) {
   };
 }
 
-async function loadVisualSettings() {
+async function loadJson(path) {
+  const response = await fetch(path, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Cannot load ${path}`);
+  return response.json();
+}
+
+async function loadStorefront() {
   try {
-    const response = await fetch(visualSettingsPath, { cache: "no-store" });
-    if (!response.ok) return normalizeVisualSettings();
-    return normalizeVisualSettings(await response.json());
+    return await loadJson("/api/storefront");
   } catch {
-    return normalizeVisualSettings();
+    return loadJson(storefrontStaticPath);
+  }
+}
+
+async function loadVisualPresetSettings(presetId) {
+  const safeId = normalizePresetId(presetId, defaultVisualPreset.id);
+  const stored = readStoredVisualSettings();
+  if (stored?.settingsByPreset?.[safeId]) {
+    return normalizeVisualSettings(stored.settingsByPreset[safeId]);
+  }
+  try {
+    return normalizeVisualSettings(await loadJson(`${visualSettingsApiPath}/${safeId}`));
+  } catch {
+    return normalizeVisualSettings(await loadJson(`/visual-settings/${safeId}.json`));
+  }
+}
+
+async function loadVisualSettings() {
+  const stored = readStoredVisualSettings();
+  if (stored) {
+    setVisualPresets(stored.index);
+    return normalizeVisualSettings(stored.settingsByPreset[state.currentVisualPreset]);
+  }
+  try {
+    const data = await loadJson(visualSettingsApiPath);
+    setVisualPresets(data);
+    return normalizeVisualSettings(data.settings);
+  } catch {
+    try {
+      const index = await loadJson(visualSettingsIndexPath);
+      setVisualPresets(index);
+      return await loadVisualPresetSettings(state.currentVisualPreset);
+    } catch {
+      try {
+        setVisualPresets({ activePreset: defaultVisualPreset.id, presets: [defaultVisualPreset] });
+        return normalizeVisualSettings(await loadJson(visualSettingsPath));
+      } catch {
+        try {
+          return normalizeVisualSettings(await loadJson(visualSettingsLegacyPath));
+        } catch {
+          return normalizeVisualSettings();
+        }
+      }
+    }
   }
 }
 
@@ -927,17 +1108,27 @@ function collectVisualSettings(panel) {
   });
 }
 
-async function persistVisualSettings(settings) {
-  const response = await fetch(visualSettingsApiPath, {
-    method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(settings)
-  });
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || "Visual settings save failed");
+async function persistVisualSettings(settings, preset = currentVisualPreset()) {
+  const presetId = normalizePresetId(preset.id, defaultVisualPreset.id);
+  const presetName = normalizePresetName(preset.name, presetId);
+  try {
+    const response = await fetch(`${visualSettingsApiPath}/${presetId}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id: presetId, name: presetName, settings })
+    });
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Visual settings save failed");
+    }
+    const result = await response.json();
+    if (result.index) setVisualPresets(result.index);
+    state.currentVisualPreset = result.id || presetId;
+    renderVisualPresetControls();
+    return normalizeVisualSettings(result.settings || settings);
+  } catch {
+    return storeVisualSettings(settings, { id: presetId, name: presetName });
   }
-  return normalizeVisualSettings(await response.json());
 }
 
 async function saveBackgroundDebugControls() {
@@ -945,11 +1136,58 @@ async function saveBackgroundDebugControls() {
   if (!panel) return;
   const preset = collectVisualSettings(panel);
   try {
-    await persistVisualSettings(preset);
-    setDebugSaveStatus("Saved.");
+    const nameInput = document.querySelector("[data-debug-preset-name]");
+    const selected = currentVisualPreset();
+    await persistVisualSettings(preset, {
+      id: selected.id,
+      name: normalizePresetName(nameInput?.value, selected.name)
+    });
+    setDebugSaveStatus("Preset saved.");
   } catch {
-    setDebugSaveStatus("Save failed. Run locally to write file.");
+    setDebugSaveStatus("Save failed.");
   }
+}
+
+async function saveNewVisualPreset() {
+  const panel = $("#backgroundDebug");
+  if (!panel) return;
+  const nameInput = document.querySelector("[data-debug-preset-name]");
+  const name = normalizePresetName(nameInput?.value, `Preset ${state.visualPresets.length + 1}`);
+  const id = uniquePresetId(name);
+  try {
+    await persistVisualSettings(collectVisualSettings(panel), { id, name });
+    setDebugSaveStatus("Preset created.");
+  } catch {
+    setDebugSaveStatus("Create failed.");
+  }
+}
+
+async function loadSelectedVisualPreset() {
+  const select = document.querySelector("[data-debug-preset-select]");
+  const presetId = normalizePresetId(select?.value, state.currentVisualPreset);
+  try {
+    const settings = await loadVisualPresetSettings(presetId);
+    state.currentVisualPreset = presetId;
+    renderVisualPresetControls();
+    applyVisualSettings(settings);
+    setDebugSaveStatus("Preset loaded.");
+  } catch {
+    setDebugSaveStatus("Load failed.");
+  }
+}
+
+function applyVisualSettings(settings) {
+  const visualSettings = normalizeVisualSettings(settings);
+  applyHeroLayout(visualSettings.heroLayout);
+  applyHeroSlidesTone(visualSettings.heroSlidesTone);
+  applyHeroMotion(visualSettings.heroMotion);
+  applyHeroAutoPause(visualSettings.heroAutoPause);
+  applyTextMotion(visualSettings.textMotion);
+  applyTextHighlightVariant(visualSettings.textHighlightVariant);
+  applyGridMotion(visualSettings.gridMotion);
+  applyGridVariant(visualSettings.gridVariant);
+  applyDebugSectionOrder(visualSettings.debugSectionOrder);
+  applyBackgroundDebugControls(visualSettings.debug);
 }
 
 function applyBackgroundDebugControls(preset) {
@@ -1079,6 +1317,14 @@ function initBackgroundDebug() {
   if (gridMotionToggle) {
     gridMotionToggle.addEventListener("click", toggleGridMotion);
   }
+  const presetSelect = document.querySelector("[data-debug-preset-select]");
+  if (presetSelect) {
+    presetSelect.addEventListener("change", () => {
+      state.currentVisualPreset = normalizePresetId(presetSelect.value, defaultVisualPreset.id);
+      renderVisualPresetControls();
+      setDebugSaveStatus("Preset selected. Load to apply.");
+    });
+  }
   panel.querySelectorAll(".debug-layer[data-debug-section]").forEach((section) => {
     section.draggable = true;
   });
@@ -1102,6 +1348,18 @@ function initBackgroundDebug() {
     }
     if (event.target.closest("[data-debug-save]")) {
       void saveBackgroundDebugControls();
+      return;
+    }
+    if (event.target.closest("[data-debug-preset-save]")) {
+      void saveBackgroundDebugControls();
+      return;
+    }
+    if (event.target.closest("[data-debug-preset-new]")) {
+      void saveNewVisualPreset();
+      return;
+    }
+    if (event.target.closest("[data-debug-preset-load]")) {
+      void loadSelectedVisualPreset();
       return;
     }
     if (event.target.closest("[data-debug-reset]")) {
@@ -1171,26 +1429,16 @@ function bindEvents() {
 }
 
 async function init() {
-  const [response, visualSettings] = await Promise.all([
-    fetch("/api/storefront", { cache: "no-store" }),
+  const [data, visualSettings] = await Promise.all([
+    loadStorefront(),
     loadVisualSettings()
   ]);
-  const data = await response.json();
   state.settings = data.settings;
   state.slides = buildHeroSlides(data.slides.filter(isPublicSlide));
   state.products = data.products;
   renderSettings();
   initBackgroundDebug();
-  applyHeroLayout(visualSettings.heroLayout);
-  applyHeroSlidesTone(visualSettings.heroSlidesTone);
-  applyHeroMotion(visualSettings.heroMotion);
-  applyHeroAutoPause(visualSettings.heroAutoPause);
-  applyTextMotion(visualSettings.textMotion);
-  applyTextHighlightVariant(visualSettings.textHighlightVariant);
-  applyGridMotion(visualSettings.gridMotion);
-  applyGridVariant(visualSettings.gridVariant);
-  applyDebugSectionOrder(visualSettings.debugSectionOrder);
-  applyBackgroundDebugControls(visualSettings.debug);
+  applyVisualSettings(visualSettings);
   renderHeroCarousel();
   startHeroCarousel();
   renderCategories();

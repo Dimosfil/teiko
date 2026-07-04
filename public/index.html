@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TEIKO</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content="TEIKO: витрина автохимии с переходом на маркетплейсы." />
     <link rel="stylesheet" href="/styles.css" />
-    <script defer src="/app.js"></script>
+    <script defer src="/app.js?v=20260704-local-save"></script>
   </head>
   <body>
     <header class="site-header">
@@ -198,6 +199,25 @@
         </div>
         <span class="debug-save-status" data-debug-save-status aria-live="polite"></span>
       </div>
+      <section class="debug-layer debug-preset-layer" aria-label="Visual preset controls">
+        <div class="debug-layer-title">
+          <span>Preset</span>
+          <span data-debug-preset-current>Default</span>
+        </div>
+        <label class="debug-preset-control">
+          <span>Use</span>
+          <select data-debug-preset-select></select>
+        </label>
+        <label class="debug-preset-control">
+          <span>Name</span>
+          <input type="text" value="Default" maxlength="48" data-debug-preset-name />
+        </label>
+        <div class="debug-button-row">
+          <button class="debug-mode-button" type="button" data-debug-preset-load>Load</button>
+          <button class="debug-mode-button" type="button" data-debug-preset-save>Save</button>
+          <button class="debug-mode-button" type="button" data-debug-preset-new>New</button>
+        </div>
+      </section>
       <section class="debug-layer" data-debug-section="mode" aria-label="Hero mode controls">
         <div class="debug-layer-title">
           <span>Mode</span>
@@ -252,7 +272,7 @@
       <section class="debug-layer" data-debug-section="text" aria-label="Text layer controls">
         <div class="debug-layer-title">
           <span>Text</span>
-          <span data-debug-readout="text-color">#050505</span>
+          <span data-debug-readout="text-colorLight">#050505</span>
         </div>
         <div class="debug-button-row is-single">
           <button
@@ -283,9 +303,14 @@
           </button>
         </div>
         <label class="debug-color-control">
-          <span>Color</span>
-          <input type="color" value="#050505" data-debug-layer="text" data-debug-prop="color" />
-          <span class="debug-color-chip" data-debug-chip="text"></span>
+          <span>Light</span>
+          <input type="color" value="#050505" data-debug-layer="text" data-debug-prop="colorLight" />
+          <span class="debug-color-chip" data-debug-chip="text-colorLight"></span>
+        </label>
+        <label class="debug-color-control">
+          <span>Dark</span>
+          <input type="color" value="#ffffff" data-debug-layer="text" data-debug-prop="colorDark" />
+          <span class="debug-color-chip" data-debug-chip="text-colorDark"></span>
         </label>
         <label class="debug-control">
           <span>Scale</span>

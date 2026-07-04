@@ -1,0 +1,542 @@
+{
+  "settings": {
+    "siteName": "TEIKO",
+    "headerTitle": "TEIKO",
+    "headerText": "Витрина автохимии, ухода за автомобилем и детейлинга.",
+    "heroTitle": "TEIKO: витрина товаров с переходом на маркетплейсы",
+    "heroText": "Сайт совмещает лаконичную визитку бренда и каталог: выбирайте товар, изучайте описание и переходите к покупке на Ozon, Wildberries или другую площадку.",
+    "aboutTitle": "Без корзины и оплаты на сайте",
+    "aboutText": "Карточки товаров ведут на внешние площадки. Контент, слайды, описания и товары управляются через отдельную закрытую рабочую зону.",
+    "contactsTitle": "Покупка на удобной площадке",
+    "contactsText": "Откройте карточку товара и нажмите кнопку нужного маркетплейса.",
+    "phone": "",
+    "email": "",
+    "logo": "/assets/logo.jpg",
+    "logoBack": "/assets/logo-back.jpg"
+  },
+  "slides": [
+    {
+      "id": 1,
+      "eyebrow": " ",
+      "title": " ",
+      "text": " ",
+      "ctaLabel": "",
+      "ctaHref": "#catalog",
+      "image": "/uploads/hero/krytex-mega-glass.png",
+      "sortOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "eyebrow": " ",
+      "title": " ",
+      "text": " ",
+      "ctaLabel": "",
+      "ctaHref": "#catalog",
+      "image": "/uploads/hero/krytex-perfume-narcotic-flower.png",
+      "sortOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "eyebrow": " ",
+      "title": " ",
+      "text": " ",
+      "ctaLabel": "",
+      "ctaHref": "#catalog",
+      "image": "/uploads/hero/krytex-perfume-blue-sky.png",
+      "sortOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "eyebrow": "",
+      "title": " ",
+      "text": "",
+      "ctaLabel": "",
+      "ctaHref": "",
+      "image": "/uploads/hero/krytex-parfume-3-male-soul-hero.png",
+      "sortOrder": 4,
+      "isActive": true
+    },
+    {
+      "id": 5,
+      "eyebrow": "",
+      "title": " ",
+      "text": "",
+      "ctaLabel": "",
+      "ctaHref": "",
+      "image": "/uploads/hero/krytex-parfume-10-gold-dust-hero.png",
+      "sortOrder": 5,
+      "isActive": true
+    },
+    {
+      "id": 6,
+      "eyebrow": "",
+      "title": " ",
+      "text": "",
+      "ctaLabel": "",
+      "ctaHref": "",
+      "image": "/uploads/hero/ftorsic-antirain-standard-kit-hero.png",
+      "sortOrder": 6,
+      "isActive": true
+    },
+    {
+      "id": 7,
+      "eyebrow": "",
+      "title": " ",
+      "text": "",
+      "ctaLabel": "",
+      "ctaHref": "",
+      "image": "/uploads/hero/krytex-parfume-2-sea-breeze-hero.png",
+      "sortOrder": 7,
+      "isActive": true
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "slug": "ftorsic-cf-antirain-50",
+      "title": "FTORSiC CF Антидождь, 50 мл",
+      "shortDescription": "Водоотталкивающий состав для стекол и зеркал автомобиля: дождь и мокрый снег скатываются крупными каплями.",
+      "description": "Водоотталкивающий состав для стекол и зеркал автомобиля: дождь и мокрый снег скатываются крупными каплями.",
+      "brand": "FTORSiC",
+      "category": "Антидождь",
+      "badge": "Стекла",
+      "sku": "OZ-3220762950",
+      "price": 690,
+      "oldPrice": 990,
+      "rating": 4.8,
+      "image": "/uploads/ftorsic-antirain-cf.jpg",
+      "sortOrder": 1,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://uz.ozon.com/product/ftorsiccf-antidozhd50-ml-3220762950/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-3220762950"
+        },
+        {
+          "label": "Бренд",
+          "value": "FTORSiC"
+        },
+        {
+          "label": "Категория",
+          "value": "Антидождь"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "slug": "ftorsic-interior-kit-4",
+      "title": "Набор «Интерьер» для автомобиля FTORSiC, 4 предмета",
+      "shortDescription": "Комплект для ухода за интерьером автомобиля: очистка и финишная обработка поверхностей салона.",
+      "description": "Комплект для ухода за интерьером автомобиля: очистка и финишная обработка поверхностей салона.",
+      "brand": "FTORSiC",
+      "category": "Салон",
+      "badge": "Набор",
+      "sku": "OZ-2760825360",
+      "price": 1890,
+      "oldPrice": 2490,
+      "rating": 4.8,
+      "image": "/uploads/ftorsic-interior-kit.jpg",
+      "sortOrder": 2,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://uz.ozon.com/product/nabor-interer-dlya-avtomobilya-ftorsic-4-predmeta-2760825360/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-2760825360"
+        },
+        {
+          "label": "Бренд",
+          "value": "FTORSiC"
+        },
+        {
+          "label": "Категория",
+          "value": "Салон"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "slug": "ftorsic-detailing-kit-6",
+      "title": "Набор детейлинга автомобиля FTORSiC, 6 предметов",
+      "shortDescription": "Набор для комплексного ухода за автомобилем; в найденной карточке указан универсальный очиститель FTORSiC RCOH.",
+      "description": "Набор для комплексного ухода за автомобилем; в найденной карточке указан универсальный очиститель FTORSiC RCOH.",
+      "brand": "FTORSiC",
+      "category": "Детейлинг",
+      "badge": "6 предметов",
+      "sku": "OZ-2647681884",
+      "price": 2990,
+      "oldPrice": 3890,
+      "rating": 4.8,
+      "image": "/uploads/ftorsic-detailing-kit.jpg",
+      "sortOrder": 3,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://am.ozon.com/product/nabor-deteylinga-avtomobilya-ftorsic-6-predmetov-2647681884/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-2647681884"
+        },
+        {
+          "label": "Бренд",
+          "value": "FTORSiC"
+        },
+        {
+          "label": "Категория",
+          "value": "Детейлинг"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "slug": "ftorsic-antirain-max-kit-6",
+      "title": "Комплект Антидождь FTORSiC Максимум, 6 предметов",
+      "shortDescription": "Расширенный комплект антидождя FTORSiC для подготовки, нанесения и ухода за стеклами.",
+      "description": "Расширенный комплект антидождя FTORSiC для подготовки, нанесения и ухода за стеклами.",
+      "brand": "FTORSiC",
+      "category": "Антидождь",
+      "badge": "Максимум",
+      "sku": "YM-4607397981",
+      "price": 2490,
+      "oldPrice": 3290,
+      "rating": 4.7,
+      "image": "/uploads/ftorsic-antirain-max-kit.jpg",
+      "sortOrder": 4,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Яндекс Маркет",
+          "url": "https://market.yandex.ru/card/komplekt-antidozhd-ftorsic-6-predmetov/4607397981"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "YM-4607397981"
+        },
+        {
+          "label": "Бренд",
+          "value": "FTORSiC"
+        },
+        {
+          "label": "Категория",
+          "value": "Антидождь"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "slug": "krytex-antirain-50",
+      "title": "KRYTEX Антидождь, готовый раствор, 50 мл",
+      "shortDescription": "Готовый водоотталкивающий состав KRYTEX для стекол автомобиля.",
+      "description": "Готовый водоотталкивающий состав KRYTEX для стекол автомобиля.",
+      "brand": "KRYTEX",
+      "category": "Антидождь",
+      "badge": "Готовый",
+      "sku": "OZ-3601125570",
+      "price": 760,
+      "oldPrice": 1090,
+      "rating": 4.8,
+      "image": "/uploads/krytex-antirain-50.jpg",
+      "sortOrder": 5,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://am.ozon.com/product/krytex-antidozhd-50-ml-1-sht-3601125570/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-3601125570"
+        },
+        {
+          "label": "Бренд",
+          "value": "KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Антидождь"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "slug": "krytex-mega-glass-50",
+      "title": "KRYTEX MEGA Glass, гидрофобное покрытие антидождь, 50 мл",
+      "shortDescription": "Гидрофобное покрытие для автомобильных стекол, рассчитанное на стойкий водоотталкивающий эффект.",
+      "description": "Гидрофобное покрытие для автомобильных стекол, рассчитанное на стойкий водоотталкивающий эффект.",
+      "brand": "KRYTEX",
+      "category": "Стекла",
+      "badge": "MEGA Glass",
+      "sku": "OZ-1590359470",
+      "price": 890,
+      "oldPrice": 1290,
+      "rating": 4.8,
+      "image": "/uploads/krytex-mega-glass.jpg",
+      "sortOrder": 6,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://ozon.by/product/gidrofobnoe-pokrytie-antidozhd-dlya-stekol-krytex-mega-glass-50ml-k001-1590359470/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-1590359470"
+        },
+        {
+          "label": "Бренд",
+          "value": "KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Стекла"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "slug": "krytex-parfume-pro-10-gold-dust",
+      "title": "Ароматизатор-спрей KRYTEX Parfume Pro №10 «Золотая пыль», 50 мл",
+      "shortDescription": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "description": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "brand": "KRYTEX",
+      "category": "Ароматы",
+      "badge": "Золотая пыль",
+      "sku": "OZ-PARFUME-10",
+      "price": 840,
+      "oldPrice": 3999,
+      "rating": 4.7,
+      "image": "/uploads/krytex-parfume-10-gold-dust.jpg",
+      "sortOrder": 7,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://www.ozon.ru/seller/limeshop36/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-PARFUME-10"
+        },
+        {
+          "label": "Бренд",
+          "value": "KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Ароматы"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "slug": "krytex-parfume-pro-1-blue-sky",
+      "title": "Ароматизатор-спрей KRYTEX Parfume Pro №1 «Синее небо», 50 мл",
+      "shortDescription": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "description": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "brand": "KRYTEX",
+      "category": "Ароматы",
+      "badge": "Синее небо",
+      "sku": "OZ-PARFUME-1",
+      "price": 840,
+      "oldPrice": 3999,
+      "rating": 4.7,
+      "image": "/uploads/krytex-parfume-1-blue-sky.jpg",
+      "sortOrder": 8,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://www.ozon.ru/seller/limeshop36/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-PARFUME-1"
+        },
+        {
+          "label": "Бренд",
+          "value": "KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Ароматы"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "slug": "krytex-parfume-pro-3-male-soul",
+      "title": "Ароматизатор-спрей KRYTEX Parfume Pro №3 «Мужская душа», 50 мл",
+      "shortDescription": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "description": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "brand": "KRYTEX",
+      "category": "Ароматы",
+      "badge": "Мужская душа",
+      "sku": "OZ-PARFUME-3",
+      "price": 971,
+      "oldPrice": 3999,
+      "rating": 4.8,
+      "image": "/uploads/krytex-parfume-3-male-soul.jpg",
+      "sortOrder": 9,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://www.ozon.ru/seller/limeshop36/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-PARFUME-3"
+        },
+        {
+          "label": "Бренд",
+          "value": "KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Ароматы"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "slug": "krytex-parfume-pro-5-narcotic-flower",
+      "title": "Ароматизатор-спрей KRYTEX Parfume Pro №5 «Наркотический цветок», 50 мл",
+      "shortDescription": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "description": "Премиальный ароматизатор-спрей KRYTEX для автомобиля, дома и офиса.",
+      "brand": "KRYTEX",
+      "category": "Ароматы",
+      "badge": "Наркотический цветок",
+      "sku": "OZ-PARFUME-5",
+      "price": 858,
+      "oldPrice": 3999,
+      "rating": 4.8,
+      "image": "/uploads/krytex-parfume-5-narcotic-flower.jpg",
+      "sortOrder": 10,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://www.ozon.ru/seller/limeshop36/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-PARFUME-5"
+        },
+        {
+          "label": "Бренд",
+          "value": "KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Ароматы"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "slug": "ftorsic-interior-krytex-pro-2",
+      "title": "Набор «Интерьер + Krytex Pro №2» для автомобиля FTORSiC, 5 предметов",
+      "shortDescription": "Комбинированный набор для ухода за салоном автомобиля с продуктами FTORSiC и KRYTEX.",
+      "description": "Комбинированный набор для ухода за салоном автомобиля с продуктами FTORSiC и KRYTEX.",
+      "brand": "FTORSiC / KRYTEX",
+      "category": "Салон",
+      "badge": "5 предметов",
+      "sku": "OZ-2819385013",
+      "price": 2390,
+      "oldPrice": 3190,
+      "rating": 4.8,
+      "image": "/uploads/ftorsic-krytex-interior-kit.jpg",
+      "sortOrder": 11,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://am.ozon.com/product/nabor-interer-dlya-avtomobilya-ftorsic-5-predmetov-2819385013/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-2819385013"
+        },
+        {
+          "label": "Бренд",
+          "value": "FTORSiC / KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Салон"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "slug": "krytex-mega-glass-anti-rain-50",
+      "title": "Антидождь KRYTEX MEGA Glass, защитное водоотталкивающее покрытие стекол",
+      "shortDescription": "Защитное водоотталкивающее нанопокрытие для стекол автомобиля.",
+      "description": "Защитное водоотталкивающее нанопокрытие для стекол автомобиля.",
+      "brand": "KRYTEX",
+      "category": "Стекла",
+      "badge": "Защита",
+      "sku": "OZ-1576507717",
+      "price": 890,
+      "oldPrice": 1290,
+      "rating": 4.8,
+      "image": "/uploads/krytex-mega-glass-protection.jpg",
+      "sortOrder": 12,
+      "isActive": true,
+      "marketplaceLinks": [
+        {
+          "label": "Ozon",
+          "url": "https://ozon.by/product/antidozhd-krytex-mega-glass-zashchitnoe-vodoottalkivayushchee-nanopokrytie-stekol-i-1576507717/"
+        }
+      ],
+      "specs": [
+        {
+          "label": "Артикул",
+          "value": "OZ-1576507717"
+        },
+        {
+          "label": "Бренд",
+          "value": "KRYTEX"
+        },
+        {
+          "label": "Категория",
+          "value": "Стекла"
+        }
+      ]
+    }
+  ]
+}
