@@ -6,7 +6,22 @@ const state = {
   query: "",
   activeSlide: 0,
   slideTimer: 0,
+  slideStartedAt: 0,
+  slideRemaining: 5200,
   isHeroPaused: false,
+  isHeroHoverPaused: false,
+  heroAutoPause: "on",
+  heroLayout: "background",
+  heroSlidesTone: "color",
+  heroMotion: "fade",
+  textMotion: "on",
+  textHighlightVariant: "knife",
+  rimRepeat: 1,
+  gridMotion: "on",
+  gridVariant: "original",
+  heroCarouselCards: 5,
+  heroTransitionTimer: 0,
+  rimPulseTimer: 0,
   revealObserver: null
 };
 
@@ -19,9 +34,28 @@ const backgroundDebugDefaults = {
     alpha: 0.46,
     blur: 18
   },
+  carousel: {
+    scale: 1,
+    x: 0,
+    y: 0,
+    cards: 5,
+    gap: 48
+  },
+  catalog: {
+    scale: 1,
+    x: 0,
+    y: 0
+  },
+  info: {
+    scale: 1,
+    x: 0,
+    y: 0
+  },
   text: {
     color: "#050505",
     scale: 1,
+    frequency: 1,
+    repeat: 1,
     x: 0,
     y: 0
   },
@@ -33,7 +67,12 @@ const backgroundDebugDefaults = {
   }
 };
 
-const backgroundDebugStorageKey = "teiko-background-debug-settings";
+const visualSettingsPath = "/visual-settings.json";
+const visualSettingsApiPath = "/api/visual-settings";
+const heroSlideDelay = 5200;
+const debugSectionDefaultOrder = ["mode", "background", "text", "grid", "carousel", "glass", "catalog", "info"];
+const textHighlightVariants = ["knife", "soft", "split", "edge", "wipe"];
+const gridVariants = ["original", "dense", "wave"];
 
 const $ = (selector) => document.querySelector(selector);
 const money = (value) =>
@@ -92,14 +131,63 @@ function transparentHeroSlide() {
 }
 
 function buildHeroSlides(slides) {
-  return [...slides, transparentHeroSlide()];
+  return slides;
 }
 
-function heroSlideCard(slide, index) {
+function wrapSlideIndex(index) {
+  if (!state.slides.length) return 0;
+  return (index + state.slides.length) % state.slides.length;
+}
+
+function clampNumber(value, min, max) {
+  return Math.min(max, Math.max(min, Number(value)));
+}
+
+function carouselCardCount(value = state.heroCarouselCards) {
+  const maxCards = Math.max(1, Math.min(9, state.slides.length || 9));
+  const minCards = Math.min(3, maxCards);
+  return Math.round(clampNumber(value || 5, minCards, maxCards));
+}
+
+function carouselGapValue(value) {
+  return Math.round(clampNumber(value || 0, 0, 120));
+}
+
+function rimFrequencyValue(value) {
+  return clampNumber(value || 1, 0.25, 3);
+}
+
+function rimRepeatValue(value) {
+  return clampNumber(value || 1, 0.2, 4);
+}
+
+function heroCarouselOffsets() {
+  const count = carouselCardCount();
+  const before = Math.floor((count - 1) / 2);
+  return Array.from({ length: count }, (_, index) => index - before);
+}
+
+function syncHeroCarouselCardCount() {
+  const carousel = $("#heroCarousel");
+  if (!carousel) return;
+  carousel.dataset.cardCount = String(state.heroCarouselCards);
+  carousel.style.setProperty("--hero-carousel-cards", String(state.heroCarouselCards));
+}
+
+function heroSlideCard(slide, index, offset = 0, edge = "") {
+  const distance = Math.abs(offset);
+  const positionClass = offset === 0
+    ? "is-active"
+    : distance === 1
+      ? "is-near"
+      : "is-far";
   if (slide.isTransparent) {
+    const fallbackImage = imageUrl(state.settings.logoBack);
     return `
-      <article class="hero-slide-card hero-slide-transparent" aria-roledescription="slide" aria-label="Slide ${index + 1}">
-        <div class="hero-card is-transparent" aria-hidden="true"></div>
+      <article class="hero-slide-card hero-slide-transparent ${positionClass}" data-offset="${offset}" data-edge="${edge}" aria-roledescription="slide" aria-label="Slide ${index + 1}">
+        <div class="hero-card is-poster is-background-preview">
+          <img src="${fallbackImage}" alt="" loading="lazy" />
+        </div>
       </article>
     `;
   }
@@ -111,9 +199,9 @@ function heroSlideCard(slide, index) {
   const text = (slide.text || "").trim();
   const hasCopy = Boolean(eyebrow || title || text || cta);
   return `
-    <article class="hero-slide-card" aria-roledescription="slide" aria-label="Slide ${index + 1}">
+    <article class="hero-slide-card ${positionClass}" data-offset="${offset}" data-edge="${edge}" aria-roledescription="slide" aria-label="Slide ${index + 1}">
       <div class="hero-card ${hasCopy ? "has-copy" : "is-poster"}">
-        <img src="${imageUrl(slide.image || state.settings.logoBack)}" alt="" loading="${index === 0 ? "eager" : "lazy"}" />
+        <img src="${imageUrl(slide.image || state.settings.logoBack)}" alt="" loading="${offset === 0 ? "eager" : "lazy"}" />
         ${
           hasCopy
             ? `
@@ -134,7 +222,6 @@ function heroSlideCard(slide, index) {
 function renderHeroPosition() {
   const track = $("#heroTrack");
   if (!track) return;
-  track.style.transform = `translateX(${-state.activeSlide * 100}%)`;
   $("#heroDots").innerHTML = state.slides
     .map(
       (_, index) => `
@@ -143,48 +230,129 @@ function renderHeroPosition() {
     )
     .join("");
   updateHeroPauseButton();
-  const progress = $("#heroProgress");
-  if (progress) {
-    progress.classList.remove("is-running");
-    progress.classList.toggle("is-paused", state.isHeroPaused);
-    if (state.isHeroPaused) return;
-    void progress.offsetWidth;
-    progress.classList.add("is-running");
-  }
+  updateHeroProgressPaused();
 }
 
 function renderHeroCarousel() {
   const track = $("#heroTrack");
   if (!track) return;
-  track.innerHTML = state.slides.map(heroSlideCard).join("");
+  syncHeroCarouselCardCount();
+  const offsets = heroCarouselOffsets();
+  const leftEdge = offsets[0];
+  const rightEdge = offsets[offsets.length - 1];
+  track.innerHTML = offsets
+    .map((offset) => {
+      const slideIndex = wrapSlideIndex(state.activeSlide + offset);
+      const edge = offset === leftEdge ? "left" : offset === rightEdge ? "right" : "";
+      return heroSlideCard(state.slides[slideIndex], slideIndex, offset, edge);
+    })
+    .join("");
   renderHeroPosition();
+}
+
+function heroSlideDirection(fromIndex, toIndex) {
+  if (!state.slides.length || fromIndex === toIndex) return "jump";
+  const forward = wrapSlideIndex(toIndex - fromIndex);
+  const backward = wrapSlideIndex(fromIndex - toIndex);
+  return forward <= backward ? "next" : "prev";
+}
+
+function animateHeroSlideChange(direction) {
+  const carousel = $("#heroCarousel");
+  if (!carousel) return;
+  window.clearTimeout(state.heroTransitionTimer);
+  carousel.classList.remove("is-sliding-next", "is-sliding-prev", "is-sliding-jump");
+  void carousel.offsetWidth;
+  carousel.classList.add(`is-sliding-${direction}`);
+  state.heroTransitionTimer = window.setTimeout(() => {
+    carousel.classList.remove("is-sliding-next", "is-sliding-prev", "is-sliding-jump");
+  }, 680);
 }
 
 function setActiveSlide(index) {
   if (!state.slides.length) return;
-  state.activeSlide = (index + state.slides.length) % state.slides.length;
-  renderHeroPosition();
+  const nextSlide = wrapSlideIndex(index);
+  const direction = heroSlideDirection(state.activeSlide, nextSlide);
+  state.activeSlide = nextSlide;
+  renderHeroCarousel();
+  animateHeroSlideChange(direction);
+  startHeroCarousel(true);
 }
 
-function startHeroCarousel() {
-  window.clearInterval(state.slideTimer);
-  if (state.isHeroPaused) {
+function isHeroAutoplayPaused() {
+  return state.isHeroPaused || state.isHeroHoverPaused;
+}
+
+function updateHeroProgressPaused() {
+  const progress = $("#heroProgress");
+  if (!progress) return;
+  progress.classList.toggle("is-paused", isHeroAutoplayPaused());
+}
+
+function restartHeroProgress(duration = heroSlideDelay) {
+  const progress = $("#heroProgress");
+  if (!progress) return;
+  progress.style.setProperty("--hero-progress-duration", `${duration}ms`);
+  progress.classList.remove("is-running", "is-paused");
+  void progress.offsetWidth;
+  progress.classList.add("is-running");
+}
+
+function holdHeroCarousel() {
+  window.clearTimeout(state.slideTimer);
+  if (state.slideStartedAt) {
+    const elapsed = Date.now() - state.slideStartedAt;
+    state.slideRemaining = Math.max(250, state.slideRemaining - elapsed);
+  }
+  updateHeroProgressPaused();
+}
+
+function startHeroCarousel(resetProgress = true) {
+  window.clearTimeout(state.slideTimer);
+  if (isHeroAutoplayPaused()) {
     renderHeroPosition();
     return;
   }
   if (state.slides.length < 2) return;
-  state.slideTimer = window.setInterval(() => setActiveSlide(state.activeSlide + 1), 5200);
+  state.slideRemaining = resetProgress ? heroSlideDelay : Math.max(250, state.slideRemaining || heroSlideDelay);
+  state.slideStartedAt = Date.now();
+  if (resetProgress) {
+    restartHeroProgress(state.slideRemaining);
+  } else {
+    updateHeroProgressPaused();
+  }
+  state.slideTimer = window.setTimeout(() => {
+    state.slideRemaining = heroSlideDelay;
+    setActiveSlide(state.activeSlide + 1);
+  }, state.slideRemaining);
 }
 
 function pauseHeroCarousel() {
   state.isHeroPaused = true;
-  window.clearInterval(state.slideTimer);
+  holdHeroCarousel();
   renderHeroPosition();
 }
 
 function resumeHeroCarousel() {
   state.isHeroPaused = false;
-  startHeroCarousel();
+  startHeroCarousel(false);
+}
+
+function setHeroSlideHoverPause(isPaused) {
+  if (state.heroAutoPause !== "on") {
+    if (state.isHeroHoverPaused) {
+      state.isHeroHoverPaused = false;
+      startHeroCarousel(false);
+    }
+    return;
+  }
+  if (state.isHeroHoverPaused === isPaused) return;
+  state.isHeroHoverPaused = isPaused;
+  if (isPaused) {
+    holdHeroCarousel();
+  } else {
+    startHeroCarousel(false);
+  }
 }
 
 function toggleHeroCarouselPause() {
@@ -195,11 +363,254 @@ function toggleHeroCarouselPause() {
   }
 }
 
+function normalizeHeroAutoPause(value) {
+  return value === "off" ? "off" : "on";
+}
+
+function updateHeroAutoPauseButton() {
+  const button = $("#heroAutoPauseToggle");
+  if (!button) return;
+  const isOn = state.heroAutoPause === "on";
+  button.textContent = isOn ? "Auto Pause" : "Auto Pause Off";
+  button.setAttribute("aria-pressed", String(isOn));
+}
+
+function applyHeroAutoPause(value) {
+  state.heroAutoPause = normalizeHeroAutoPause(value);
+  if (state.heroAutoPause !== "on" && state.isHeroHoverPaused) {
+    state.isHeroHoverPaused = false;
+    startHeroCarousel(false);
+  }
+  updateHeroAutoPauseButton();
+  updateHeroProgressPaused();
+}
+
+function toggleHeroAutoPause() {
+  const nextValue = state.heroAutoPause === "on" ? "off" : "on";
+  applyHeroAutoPause(nextValue);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
 function updateHeroPauseButton() {
   const button = $("#heroPause");
   if (!button) return;
   button.textContent = state.isHeroPaused ? "Play" : "Pause";
   button.setAttribute("aria-pressed", String(state.isHeroPaused));
+}
+
+function normalizeHeroLayout(value) {
+  return value === "header" ? "header" : "background";
+}
+
+function updateHeroLayoutButton() {
+  const button = $("#heroLayoutToggle");
+  if (!button) return;
+  const isHeader = state.heroLayout === "header";
+  button.textContent = isHeader ? "Mode: Header" : "Mode: Current";
+  button.setAttribute("aria-pressed", String(isHeader));
+}
+
+function applyHeroLayout(layout) {
+  state.heroLayout = normalizeHeroLayout(layout);
+  const hero = $(".hero");
+  if (hero) {
+    hero.classList.toggle("hero-layout-header", state.heroLayout === "header");
+    hero.classList.toggle("hero-layout-background", state.heroLayout !== "header");
+  }
+  updateHeroLayoutButton();
+}
+
+function toggleHeroLayout() {
+  const nextLayout = state.heroLayout === "header" ? "background" : "header";
+  applyHeroLayout(nextLayout);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
+function normalizeHeroSlidesTone(value) {
+  return value === "mono" ? "mono" : "color";
+}
+
+function updateHeroSlidesToneButton() {
+  const button = $("#slideToneToggle");
+  if (!button) return;
+  const isMono = state.heroSlidesTone === "mono";
+  button.textContent = isMono ? "Slides: Mono" : "Slides: Color";
+  button.setAttribute("aria-pressed", String(isMono));
+}
+
+function applyHeroSlidesTone(tone) {
+  state.heroSlidesTone = normalizeHeroSlidesTone(tone);
+  const hero = $(".hero");
+  if (hero) hero.classList.toggle("hero-slides-mono", state.heroSlidesTone === "mono");
+  updateHeroSlidesToneButton();
+}
+
+function toggleHeroSlidesTone() {
+  const nextTone = state.heroSlidesTone === "mono" ? "color" : "mono";
+  applyHeroSlidesTone(nextTone);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
+function normalizeHeroMotion(value) {
+  return value === "focus" ? "focus" : "fade";
+}
+
+function updateHeroMotionButton() {
+  const button = $("#slideMotionToggle");
+  if (!button) return;
+  const isFocus = state.heroMotion === "focus";
+  button.textContent = isFocus ? "Motion: Focus" : "Motion: Fade";
+  button.setAttribute("aria-pressed", String(isFocus));
+}
+
+function applyHeroMotion(motion) {
+  state.heroMotion = normalizeHeroMotion(motion);
+  const hero = $(".hero");
+  if (hero) {
+    hero.classList.toggle("hero-motion-focus", state.heroMotion === "focus");
+    hero.classList.toggle("hero-motion-fade", state.heroMotion !== "focus");
+  }
+  updateHeroMotionButton();
+}
+
+function toggleHeroMotion() {
+  const nextMotion = state.heroMotion === "focus" ? "fade" : "focus";
+  applyHeroMotion(nextMotion);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
+function normalizeTextMotion(value) {
+  return value === "off" ? "off" : "on";
+}
+
+function updateTextMotionButton() {
+  const button = $("#textMotionToggle");
+  if (!button) return;
+  const isOn = state.textMotion === "on";
+  button.textContent = isOn ? "Rim Light" : "Rim Light Off";
+  button.setAttribute("aria-pressed", String(isOn));
+}
+
+function triggerRimPulse() {
+  const hero = $(".hero");
+  if (!hero || state.textMotion !== "on") return;
+  hero.classList.remove("hero-rim-pulse");
+  void hero.offsetWidth;
+  hero.classList.add("hero-rim-pulse");
+}
+
+function scheduleRimPulse() {
+  window.clearInterval(state.rimPulseTimer);
+  const hero = $(".hero");
+  if (!hero || state.textMotion !== "on") {
+    if (hero) hero.classList.remove("hero-rim-pulse");
+    return;
+  }
+  triggerRimPulse();
+  const cycleMs = Math.round(4200 / rimRepeatValue(state.rimRepeat));
+  state.rimPulseTimer = window.setInterval(triggerRimPulse, Math.max(700, cycleMs));
+}
+
+function applyTextMotion(motion) {
+  state.textMotion = normalizeTextMotion(motion);
+  const hero = $(".hero");
+  if (hero) {
+    hero.classList.toggle("hero-text-motion-on", state.textMotion === "on");
+    hero.classList.toggle("hero-text-motion-off", state.textMotion !== "on");
+  }
+  updateTextMotionButton();
+  scheduleRimPulse();
+}
+
+function toggleTextMotion() {
+  const nextMotion = state.textMotion === "on" ? "off" : "on";
+  applyTextMotion(nextMotion);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
+function normalizeTextHighlightVariant(value) {
+  return textHighlightVariants.includes(value) ? value : "knife";
+}
+
+function updateTextHighlightVariantButtons() {
+  document.querySelectorAll("[data-text-highlight-variant]").forEach((button) => {
+    const isActive = button.dataset.textHighlightVariant === state.textHighlightVariant;
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function applyTextHighlightVariant(variant) {
+  state.textHighlightVariant = normalizeTextHighlightVariant(variant);
+  const hero = $(".hero");
+  if (hero) {
+    textHighlightVariants.forEach((value) => {
+      hero.classList.toggle(`hero-rim-variant-${value}`, value === state.textHighlightVariant);
+    });
+    hero.dataset.textHighlightVariant = state.textHighlightVariant;
+  }
+  updateTextHighlightVariantButtons();
+  scheduleRimPulse();
+}
+
+function setTextHighlightVariant(variant) {
+  applyTextHighlightVariant(variant);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
+function normalizeGridMotion(value) {
+  return value === "off" ? "off" : "on";
+}
+
+function updateGridMotionButton() {
+  const button = $("#gridMotionToggle");
+  if (!button) return;
+  const isOn = state.gridMotion === "on";
+  button.textContent = isOn ? "Grid: Motion" : "Grid: Static";
+  button.setAttribute("aria-pressed", String(isOn));
+}
+
+function applyGridMotion(motion) {
+  state.gridMotion = normalizeGridMotion(motion);
+  const hero = $(".hero");
+  if (hero) {
+    hero.classList.toggle("hero-grid-motion-on", state.gridMotion === "on");
+    hero.classList.toggle("hero-grid-motion-off", state.gridMotion !== "on");
+  }
+  updateGridMotionButton();
+}
+
+function toggleGridMotion() {
+  const nextMotion = state.gridMotion === "on" ? "off" : "on";
+  applyGridMotion(nextMotion);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
+function normalizeGridVariant(value) {
+  return gridVariants.includes(value) ? value : "original";
+}
+
+function updateGridVariantButtons() {
+  document.querySelectorAll("[data-grid-variant]").forEach((button) => {
+    const isActive = button.dataset.gridVariant === state.gridVariant;
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function applyGridVariant(variant) {
+  state.gridVariant = normalizeGridVariant(variant);
+  const hero = $(".hero");
+  if (hero) {
+    gridVariants.forEach((value) => {
+      hero.classList.toggle(`hero-grid-variant-${value}`, value === state.gridVariant);
+    });
+    hero.dataset.gridVariant = state.gridVariant;
+  }
+  updateGridVariantButtons();
+}
+
+function setGridVariant(variant) {
+  applyGridVariant(variant);
+  setDebugSaveStatus("Preview changed. Save to keep.");
 }
 
 function renderCategories() {
@@ -318,6 +729,10 @@ function rgbaFromHex(hex, alpha) {
 
 function debugReadoutValue(prop, value) {
   if (["base", "color", "tint"].includes(prop)) return value.toLowerCase();
+  if (prop === "cards") return String(carouselCardCount(value));
+  if (prop === "gap") return `${carouselGapValue(value)}px`;
+  if (prop === "frequency") return `${rimFrequencyValue(value).toFixed(2)}x`;
+  if (prop === "repeat") return `${rimRepeatValue(value).toFixed(2)}x`;
   if (prop === "alpha") return Number(value).toFixed(2);
   if (prop === "scale") return Number(value).toFixed(2);
   return `${Math.round(Number(value))}px`;
@@ -340,6 +755,36 @@ function setDebugSaveStatus(message) {
 function applyBackgroundDebugValue(layer, prop, value) {
   const hero = $(".hero");
   const catalogPanel = $(".catalog-panel");
+  const aboutSection = $(".about");
+  const heroCarousel = $("#heroCarousel");
+  if (["carousel", "catalog", "info"].includes(layer)) {
+    const target = layer === "carousel"
+      ? heroCarousel
+      : layer === "catalog"
+        ? catalogPanel
+        : aboutSection;
+    if (!target) return;
+    const numericValue = Number(value);
+    if (layer === "carousel" && prop === "cards") {
+      state.heroCarouselCards = carouselCardCount(numericValue);
+      syncHeroCarouselCardCount();
+      updateDebugReadout(layer, prop, state.heroCarouselCards);
+      renderHeroCarousel();
+      return;
+    }
+    const safeNumericValue = layer === "carousel" && prop === "gap"
+      ? carouselGapValue(numericValue)
+      : numericValue;
+    const cssValue = prop === "scale" ? String(safeNumericValue) : `${safeNumericValue}px`;
+    const cssPrefix = layer === "carousel"
+      ? "hero-carousel"
+      : layer === "info"
+        ? "about"
+        : "catalog";
+    target.style.setProperty(`--${cssPrefix}-${prop}`, cssValue);
+    updateDebugReadout(layer, prop, value);
+    return;
+  }
   if (layer === "glass") {
     if (!catalogPanel) return;
     const numericValue = Number(value);
@@ -369,6 +814,19 @@ function applyBackgroundDebugValue(layer, prop, value) {
   }
 
   const numericValue = Number(value);
+  if (layer === "text" && prop === "frequency") {
+    const speed = rimFrequencyValue(numericValue);
+    hero.style.setProperty("--rim-speed", String(speed));
+    updateDebugReadout(layer, prop, speed);
+    scheduleRimPulse();
+    return;
+  }
+  if (layer === "text" && prop === "repeat") {
+    state.rimRepeat = rimRepeatValue(numericValue);
+    updateDebugReadout(layer, prop, state.rimRepeat);
+    scheduleRimPulse();
+    return;
+  }
   const cssValue = prop === "scale" ? String(numericValue) : `${numericValue}px`;
   const cssVar = layer === "text"
     ? `--hero-logo-${prop}`
@@ -400,27 +858,97 @@ function normalizeBackgroundDebugPreset(input) {
       if (input[layer][prop] !== undefined) preset[layer][prop] = input[layer][prop];
     });
   });
+  preset.carousel.cards = carouselCardCount(preset.carousel.cards);
+  preset.carousel.gap = carouselGapValue(preset.carousel.gap);
   return preset;
 }
 
-function loadSavedBackgroundDebugControls() {
+function normalizeDebugSectionOrder(order) {
+  const values = Array.isArray(order) ? order : [];
+  const known = values.filter((section) => debugSectionDefaultOrder.includes(section));
+  return [
+    ...known.filter((section, index) => known.indexOf(section) === index),
+    ...debugSectionDefaultOrder.filter((section) => !known.includes(section))
+  ];
+}
+
+function getCurrentDebugSectionOrder(panel) {
+  return [...panel.querySelectorAll(".debug-layer[data-debug-section]")]
+    .map((section) => section.dataset.debugSection)
+    .filter(Boolean);
+}
+
+function applyDebugSectionOrder(order) {
+  const panel = $("#backgroundDebug");
+  if (!panel) return;
+  normalizeDebugSectionOrder(order).forEach((sectionName) => {
+    const section = panel.querySelector(`.debug-layer[data-debug-section="${sectionName}"]`);
+    if (section) panel.append(section);
+  });
+}
+
+function normalizeVisualSettings(input = {}) {
+  return {
+    debug: normalizeBackgroundDebugPreset(input.debug),
+    heroLayout: normalizeHeroLayout(input.heroLayout),
+    heroSlidesTone: normalizeHeroSlidesTone(input.heroSlidesTone),
+    heroMotion: normalizeHeroMotion(input.heroMotion),
+    heroAutoPause: normalizeHeroAutoPause(input.heroAutoPause),
+    textMotion: normalizeTextMotion(input.textMotion),
+    textHighlightVariant: normalizeTextHighlightVariant(input.textHighlightVariant),
+    gridMotion: normalizeGridMotion(input.gridMotion),
+    gridVariant: normalizeGridVariant(input.gridVariant),
+    debugSectionOrder: normalizeDebugSectionOrder(input.debugSectionOrder)
+  };
+}
+
+async function loadVisualSettings() {
   try {
-    const saved = localStorage.getItem(backgroundDebugStorageKey);
-    return saved ? normalizeBackgroundDebugPreset(JSON.parse(saved)) : normalizeBackgroundDebugPreset();
+    const response = await fetch(visualSettingsPath, { cache: "no-store" });
+    if (!response.ok) return normalizeVisualSettings();
+    return normalizeVisualSettings(await response.json());
   } catch {
-    return normalizeBackgroundDebugPreset();
+    return normalizeVisualSettings();
   }
 }
 
-function saveBackgroundDebugControls() {
+function collectVisualSettings(panel) {
+  return normalizeVisualSettings({
+    debug: collectBackgroundDebugControls(panel),
+    heroLayout: state.heroLayout,
+    heroSlidesTone: state.heroSlidesTone,
+    heroMotion: state.heroMotion,
+    heroAutoPause: state.heroAutoPause,
+    textMotion: state.textMotion,
+    textHighlightVariant: state.textHighlightVariant,
+    gridMotion: state.gridMotion,
+    gridVariant: state.gridVariant,
+    debugSectionOrder: getCurrentDebugSectionOrder(panel)
+  });
+}
+
+async function persistVisualSettings(settings) {
+  const response = await fetch(visualSettingsApiPath, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(settings)
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || "Visual settings save failed");
+  }
+  return normalizeVisualSettings(await response.json());
+}
+
+async function saveBackgroundDebugControls() {
   const panel = $("#backgroundDebug");
   if (!panel) return;
-  const preset = collectBackgroundDebugControls(panel);
+  const preset = collectVisualSettings(panel);
   try {
-    localStorage.setItem(backgroundDebugStorageKey, JSON.stringify(preset));
+    await persistVisualSettings(preset);
     setDebugSaveStatus("Saved.");
   } catch {
-    setDebugSaveStatus("Save failed.");
+    setDebugSaveStatus("Save failed. Run locally to write file.");
   }
 }
 
@@ -437,8 +965,76 @@ function applyBackgroundDebugControls(preset) {
 }
 
 function resetBackgroundDebugControls() {
+  applyHeroLayout("background");
+  applyHeroSlidesTone("color");
+  applyHeroMotion("fade");
+  applyHeroAutoPause("on");
+  applyTextMotion("on");
+  applyTextHighlightVariant("knife");
+  applyGridMotion("on");
+  applyGridVariant("original");
+  applyDebugSectionOrder(debugSectionDefaultOrder);
   applyBackgroundDebugControls(backgroundDebugDefaults);
   setDebugSaveStatus("Reset preview. Save to keep.");
+}
+
+function debugSectionAfterPointer(panel, y) {
+  const sections = [...panel.querySelectorAll(".debug-layer[data-debug-section]:not(.is-dragging)")];
+  return sections.reduce((closest, section) => {
+    const bounds = section.getBoundingClientRect();
+    const offset = y - bounds.top - bounds.height / 2;
+    if (offset >= 0 || offset <= closest.offset) return closest;
+    return { offset, section };
+  }, { offset: Number.NEGATIVE_INFINITY, section: null }).section;
+}
+
+function initDebugSectionDrag(panel) {
+  let draggedSection = null;
+  let dragHandleSection = null;
+  let dragStartOrder = "";
+  panel.addEventListener("pointerdown", (event) => {
+    const title = event.target.closest(".debug-layer-title");
+    dragHandleSection = title ? title.closest(".debug-layer[data-debug-section]") : null;
+  });
+  panel.addEventListener("dragstart", (event) => {
+    const section = event.target.closest(".debug-layer[data-debug-section]");
+    if (!section || dragHandleSection !== section || !panel.contains(section)) {
+      event.preventDefault();
+      return;
+    }
+    draggedSection = section;
+    dragStartOrder = getCurrentDebugSectionOrder(panel).join("|");
+    section.classList.add("is-dragging");
+    section.setAttribute("aria-grabbed", "true");
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", section.dataset.debugSection);
+  });
+  panel.addEventListener("dragover", (event) => {
+    if (!draggedSection) return;
+    event.preventDefault();
+    const nextSection = debugSectionAfterPointer(panel, event.clientY);
+    if (nextSection) {
+      panel.insertBefore(draggedSection, nextSection);
+    } else {
+      panel.append(draggedSection);
+    }
+  });
+  panel.addEventListener("drop", (event) => {
+    if (!draggedSection) return;
+    event.preventDefault();
+    setDebugSaveStatus("Order changed. Save to keep.");
+  });
+  panel.addEventListener("dragend", () => {
+    if (!draggedSection) return;
+    draggedSection.classList.remove("is-dragging");
+    draggedSection.removeAttribute("aria-grabbed");
+    if (dragStartOrder && dragStartOrder !== getCurrentDebugSectionOrder(panel).join("|")) {
+      setDebugSaveStatus("Order changed. Save to keep.");
+    }
+    draggedSection = null;
+    dragHandleSection = null;
+    dragStartOrder = "";
+  });
 }
 
 function setBackgroundDebugOpen(isOpen) {
@@ -459,6 +1055,34 @@ function initBackgroundDebug() {
       setBackgroundDebugOpen(panel.hidden);
     });
   }
+  const layoutToggle = $("#heroLayoutToggle");
+  if (layoutToggle) {
+    layoutToggle.addEventListener("click", toggleHeroLayout);
+  }
+  const slideToneToggle = $("#slideToneToggle");
+  if (slideToneToggle) {
+    slideToneToggle.addEventListener("click", toggleHeroSlidesTone);
+  }
+  const slideMotionToggle = $("#slideMotionToggle");
+  if (slideMotionToggle) {
+    slideMotionToggle.addEventListener("click", toggleHeroMotion);
+  }
+  const heroAutoPauseToggle = $("#heroAutoPauseToggle");
+  if (heroAutoPauseToggle) {
+    heroAutoPauseToggle.addEventListener("click", toggleHeroAutoPause);
+  }
+  const textMotionToggle = $("#textMotionToggle");
+  if (textMotionToggle) {
+    textMotionToggle.addEventListener("click", toggleTextMotion);
+  }
+  const gridMotionToggle = $("#gridMotionToggle");
+  if (gridMotionToggle) {
+    gridMotionToggle.addEventListener("click", toggleGridMotion);
+  }
+  panel.querySelectorAll(".debug-layer[data-debug-section]").forEach((section) => {
+    section.draggable = true;
+  });
+  initDebugSectionDrag(panel);
   panel.addEventListener("input", (event) => {
     const input = event.target.closest("[data-debug-layer][data-debug-prop]");
     if (!input) return;
@@ -466,8 +1090,18 @@ function initBackgroundDebug() {
     setDebugSaveStatus("");
   });
   panel.addEventListener("click", (event) => {
+    const textHighlightVariantButton = event.target.closest("[data-text-highlight-variant]");
+    if (textHighlightVariantButton) {
+      setTextHighlightVariant(textHighlightVariantButton.dataset.textHighlightVariant);
+      return;
+    }
+    const gridVariantButton = event.target.closest("[data-grid-variant]");
+    if (gridVariantButton) {
+      setGridVariant(gridVariantButton.dataset.gridVariant);
+      return;
+    }
     if (event.target.closest("[data-debug-save]")) {
-      saveBackgroundDebugControls();
+      void saveBackgroundDebugControls();
       return;
     }
     if (event.target.closest("[data-debug-reset]")) {
@@ -478,7 +1112,6 @@ function initBackgroundDebug() {
     if (event.key !== "Escape" || panel.hidden) return;
     setBackgroundDebugOpen(false);
   });
-  applyBackgroundDebugControls(loadSavedBackgroundDebugControls());
   setBackgroundDebugOpen(false);
 }
 
@@ -504,17 +1137,24 @@ function bindEvents() {
     if (heroPause) toggleHeroCarouselPause();
     if (heroStep) {
       setActiveSlide(state.activeSlide + Number(heroStep.dataset.heroStep));
-      startHeroCarousel();
     }
     if (heroSlide) {
       setActiveSlide(Number(heroSlide.dataset.heroSlide));
-      startHeroCarousel();
     }
   });
-  $("#heroCarousel").addEventListener("mouseenter", () => window.clearInterval(state.slideTimer));
-  $("#heroCarousel").addEventListener("mouseleave", startHeroCarousel);
-  $("#heroCarousel").addEventListener("focusin", () => window.clearInterval(state.slideTimer));
-  $("#heroCarousel").addEventListener("focusout", startHeroCarousel);
+  $("#heroCarousel").addEventListener("pointerover", (event) => {
+    if (event.target.closest(".hero-slide-card")) {
+      setHeroSlideHoverPause(true);
+    }
+  });
+  $("#heroCarousel").addEventListener("pointerout", (event) => {
+    const slideCard = event.target.closest(".hero-slide-card");
+    if (!slideCard) return;
+    const nextTarget = event.relatedTarget;
+    if (nextTarget && slideCard.contains(nextTarget)) return;
+    const nextSlideCard = nextTarget instanceof Element ? nextTarget.closest(".hero-slide-card") : null;
+    setHeroSlideHoverPause(Boolean(nextSlideCard));
+  });
   $("#heroCarousel").addEventListener("pointermove", (event) => {
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - bounds.left) / bounds.width - 0.5).toFixed(3);
@@ -523,6 +1163,7 @@ function bindEvents() {
     event.currentTarget.style.setProperty("--hero-y", y);
   });
   $("#heroCarousel").addEventListener("pointerleave", (event) => {
+    setHeroSlideHoverPause(false);
     event.currentTarget.style.setProperty("--hero-x", 0);
     event.currentTarget.style.setProperty("--hero-y", 0);
   });
@@ -530,13 +1171,26 @@ function bindEvents() {
 }
 
 async function init() {
-  const response = await fetch("/api/storefront", { cache: "no-store" });
+  const [response, visualSettings] = await Promise.all([
+    fetch("/api/storefront", { cache: "no-store" }),
+    loadVisualSettings()
+  ]);
   const data = await response.json();
   state.settings = data.settings;
   state.slides = buildHeroSlides(data.slides.filter(isPublicSlide));
   state.products = data.products;
   renderSettings();
   initBackgroundDebug();
+  applyHeroLayout(visualSettings.heroLayout);
+  applyHeroSlidesTone(visualSettings.heroSlidesTone);
+  applyHeroMotion(visualSettings.heroMotion);
+  applyHeroAutoPause(visualSettings.heroAutoPause);
+  applyTextMotion(visualSettings.textMotion);
+  applyTextHighlightVariant(visualSettings.textHighlightVariant);
+  applyGridMotion(visualSettings.gridMotion);
+  applyGridVariant(visualSettings.gridVariant);
+  applyDebugSectionOrder(visualSettings.debugSectionOrder);
+  applyBackgroundDebugControls(visualSettings.debug);
   renderHeroCarousel();
   startHeroCarousel();
   renderCategories();

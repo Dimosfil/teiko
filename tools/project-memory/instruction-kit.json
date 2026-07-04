@@ -1,5 +1,5 @@
 ﻿{
-    "instruction_kit_version":  "2026.07.02.1",
+    "instruction_kit_version":  "2026.07.03.1",
     "source":  "D:\\AI\\general-instructions",
     "installed_at":  "2026-07-02T10:57:47+03:00",
     "update_check":  {
@@ -190,7 +190,8 @@
                                "2026.06.30.2__add_api_key_secret_safety",
                                "2026.07.01.1__classify_development_vs_refactor",
                                "2026.06.24.6__add_local_sprint_command",
-                               "2026.07.02.1__require_project_identity_before_writes"
+                               "2026.07.02.1__require_project_identity_before_writes",
+                               "2026.07.03.1__add_gi_docker_command"
                            ],
-    "last_update_check_at":  "2026-07-02T19:16:56+03:00"
+    "last_update_check_at":  "2026-07-04T08:36:57+03:00"
 }

@@ -87,6 +87,28 @@
   their hosting or production deploy contract and are not restarted by local
   `gi reboot` unless project-local production instructions explicitly define
   that behavior.
+- Treat `gi docker`, `ги докер`, and equivalent Docker restart wording as a
+  request to restart the current project's documented Docker or Docker Compose
+  runtime, rebuilding first only when local Docker state requires it. Read
+  project-local Docker/run instructions, Dockerfile or Containerfile,
+  `compose.yaml`, `compose.yml`, `docker-compose*.yml`, container scripts,
+  manifests, service records, and project memory before touching containers. If
+  the project has no Docker/Compose config and no documented Docker run
+  contract, report that Docker is not configured for this project and stop
+  instead of inventing commands. If Docker CLI, Docker Compose, or the Docker
+  engine is unavailable or not running, report that blocker and do not claim a
+  restart. Rebuild before restart when the image is missing, the local Docker
+  contract says to rebuild, Dockerfile/Compose/build-context/dependency
+  manifests changed since the known running image, or freshness cannot be
+  confidently proven. Prefer project-documented commands; otherwise use the
+  narrow project Compose operation, such as `docker compose up -d --build` when
+  rebuilding is needed and `docker compose up -d` or the documented restart
+  command when the existing image is current. Scope all operations to the
+  current project only: do not prune Docker system state, remove volumes, delete
+  images, or stop unrelated containers. After the operation, verify documented
+  container status, health checks, mapped service URLs, and recent logs when
+  failures appear, then report rebuilt/restarted/not-configured/blocked status
+  with evidence.
 - Treat `gi first test`, `gi первый тест`, and `ги первый тест` as requests to
   verify the current application's first-launch experience by resetting only
   documented project-owned app cache, generated state, temporary first-run

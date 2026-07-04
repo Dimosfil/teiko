@@ -24,6 +24,7 @@ const adminPath = process.env.ADMIN_PATH || "/test-admin-teiko";
 const publicDir = path.resolve("public");
 const adminDir = path.resolve("admin-console");
 const uploadDir = path.resolve(process.env.UPLOAD_DIR || path.join(publicDir, "uploads"));
+const visualSettingsPath = path.join(publicDir, "visual-settings.json");
 
 fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -73,6 +74,19 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(uploadDir));
 app.use(express.static(publicDir));
+
+app.put("/api/visual-settings", (req, res) => {
+  if (process.env.NODE_ENV === "production" && process.env.VISUAL_SETTINGS_WRITE !== "1") {
+    res.status(403).json({ error: "Visual settings write is disabled in production" });
+    return;
+  }
+  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    res.status(400).json({ error: "Visual settings payload must be an object" });
+    return;
+  }
+  fs.writeFileSync(visualSettingsPath, `${JSON.stringify(req.body, null, 2)}\n`, "utf8");
+  res.json(req.body);
+});
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "teiko-showcase" });

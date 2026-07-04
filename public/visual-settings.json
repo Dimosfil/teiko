@@ -1,0 +1,61 @@
+{
+  "debug": {
+    "background": {
+      "base": "#ffffff",
+      "tint": "#eff7ee"
+    },
+    "glass": {
+      "alpha": "0.46",
+      "blur": "18"
+    },
+    "carousel": {
+      "scale": "1",
+      "x": "0",
+      "y": "0",
+      "cards": 5,
+      "gap": 0
+    },
+    "catalog": {
+      "scale": "1",
+      "x": "0",
+      "y": "0"
+    },
+    "info": {
+      "scale": "1",
+      "x": "0",
+      "y": "0"
+    },
+    "text": {
+      "color": "#050505",
+      "scale": "1",
+      "frequency": "1",
+      "repeat": "1",
+      "x": "0",
+      "y": "0"
+    },
+    "grid": {
+      "color": "#48b45a",
+      "scale": "1",
+      "x": "0",
+      "y": "0"
+    }
+  },
+  "heroLayout": "header",
+  "heroSlidesTone": "color",
+  "heroMotion": "focus",
+  "heroAutoPause": "on",
+  "textMotion": "on",
+  "textHighlightVariant": "edge",
+  "gridMotion": "on",
+  "gridVariant": "wave",
+  "debugSectionOrder": [
+    "mode",
+    "background",
+    "text",
+    "grid",
+    "carousel",
+    "glass",
+    "catalog",
+    "info"
+  ]
+}
