@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@700;800;900&family=Jura:wght@700&family=Manrope:wght@400;700;800&family=Russo+One&family=Tektur:wght@600;700;800&display=swap");
+
 :root {
   color-scheme: light;
   --bg: #f2f2ef;
@@ -1278,6 +1280,10 @@ img {
   backdrop-filter: blur(16px) saturate(1.1);
 }
 
+.debug-toggle[hidden] {
+  display: none;
+}
+
 .debug-toggle.is-active {
   background: var(--ink);
   color: white;
@@ -1707,6 +1713,20 @@ h1 {
   font-weight: 900;
 }
 
+.catalog-title-font-tech {
+  font-family: "Tektur", "Exo 2", "Segoe UI", Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.catalog-title-font-stencil {
+  font-family: "Russo One", "Jura", "Segoe UI", Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .catalog-title-font-teiko {
   display: inline-flex;
   align-items: baseline;
@@ -1978,6 +1998,8 @@ h1 {
 }
 
 .product-image img {
+  box-sizing: border-box;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -1986,7 +2008,7 @@ h1 {
 }
 
 .product-card:hover .product-image img {
-  transform: scale(1.045) rotate(-1deg);
+  transform: none;
 }
 
 .product-copy {

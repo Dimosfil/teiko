@@ -98,8 +98,17 @@ function renderCatalogTitle(textValue, fontValue) {
   const text = String(textValue || backgroundDebugDefaults.catalogTitle.text);
   const font = fontValue || debugControlValue("catalogTitle", "font", backgroundDebugDefaults.catalogTitle.font);
   const useTeikoLogo = font === "teiko";
+  const fontClasses = [
+    "catalog-title-font-default",
+    "catalog-title-font-tech",
+    "catalog-title-font-stencil",
+    "catalog-title-font-teiko"
+  ];
+  title.classList.remove(...fontClasses);
   title.classList.toggle("catalog-title-font-teiko", useTeikoLogo);
-  title.classList.toggle("catalog-title-font-default", !useTeikoLogo);
+  if (font === "tech") title.classList.add("catalog-title-font-tech");
+  else if (font === "stencil") title.classList.add("catalog-title-font-stencil");
+  else if (!useTeikoLogo) title.classList.add("catalog-title-font-default");
   if (!useTeikoLogo) {
     title.textContent = text;
     return;
@@ -1203,14 +1212,15 @@ async function loadStorefront() {
 
 async function loadVisualPresetSettings(presetId) {
   const safeId = normalizePresetId(presetId, defaultVisualPreset.id);
-  const stored = readStoredVisualSettings();
-  if (stored?.settingsByPreset?.[safeId]) {
-    return normalizeVisualSettings(stored.settingsByPreset[safeId]);
-  }
   try {
     return normalizeVisualSettings(await loadJson(`${visualSettingsApiPath}/${safeId}`));
   } catch {
-    return normalizeVisualSettings(await loadJson(`/visual-settings/${safeId}.json`));
+    try {
+      return normalizeVisualSettings(await loadJson(`/visual-settings/${safeId}.json`));
+    } catch {
+      const stored = readStoredVisualSettings();
+      return normalizeVisualSettings(stored?.settingsByPreset?.[safeId]);
+    }
   }
 }
 
@@ -1232,7 +1242,7 @@ async function loadVisualSettings() {
     try {
       const fileIndex = await loadJson(visualSettingsIndexPath);
       const index = mergeVisualPresetIndexes(fileIndex, stored?.index);
-      const activePreset = normalizePresetId(stored?.index?.activePreset || fileIndex.activePreset, index.activePreset);
+      const activePreset = normalizePresetId(fileIndex.activePreset || stored?.index?.activePreset, index.activePreset);
       setVisualPresets({ ...index, activePreset });
       return await loadVisualPresetSettings(state.currentVisualPreset);
     } catch {
@@ -1442,6 +1452,11 @@ function initDebugSectionDrag(panel) {
   });
 }
 
+function visualDebugEnabled() {
+  const params = new URLSearchParams(window.location.search);
+  return ["1", "true", "on"].includes(String(params.get("debug") || params.get("bg") || params.get("visual")).toLowerCase());
+}
+
 function setBackgroundDebugOpen(isOpen) {
   const panel = $("#backgroundDebug");
   const toggle = $("#backgroundDebugToggle");
@@ -1455,6 +1470,12 @@ function initBackgroundDebug() {
   const panel = $("#backgroundDebug");
   if (!panel) return;
   const toggle = $("#backgroundDebugToggle");
+  if (!visualDebugEnabled()) {
+    if (toggle) toggle.hidden = true;
+    panel.hidden = true;
+    return;
+  }
+  if (toggle) toggle.hidden = false;
   if (toggle) {
     toggle.addEventListener("click", () => {
       setBackgroundDebugOpen(panel.hidden);

@@ -23,12 +23,17 @@ const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
 const adminPath = process.env.ADMIN_PATH || "/test-admin-teiko";
 const publicDir = path.resolve("public");
 const adminDir = path.resolve("admin-console");
+const dataDir = path.resolve(process.env.DATA_DIR || "data");
 const uploadDir = path.resolve(process.env.UPLOAD_DIR || path.join(publicDir, "uploads"));
-const visualSettingsPath = path.join(publicDir, "visual-settings.json");
-const visualSettingsDir = path.join(publicDir, "visual-settings");
+const bundledVisualSettingsPath = path.join(publicDir, "visual-settings.json");
+const bundledVisualSettingsDir = path.join(publicDir, "visual-settings");
+const bundledDefaultVisualSettingsPath = path.join(bundledVisualSettingsDir, "default.json");
+const visualSettingsDir = path.resolve(process.env.VISUAL_SETTINGS_DIR || path.join(dataDir, "visual-settings"));
+const visualSettingsPath = path.join(visualSettingsDir, "default.json");
 const visualSettingsIndexPath = path.join(visualSettingsDir, "index.json");
 const defaultVisualSettingsPreset = { id: "default", name: "Default" };
 
+fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(uploadDir, { recursive: true });
 fs.mkdirSync(visualSettingsDir, { recursive: true });
 
@@ -82,6 +87,26 @@ function readJsonFile(filePath, fallback) {
   }
 }
 
+function seedVisualSettingsStore() {
+  if (!fs.existsSync(visualSettingsPath)) {
+    const sourcePath = [bundledDefaultVisualSettingsPath, bundledVisualSettingsPath].find((filePath) => fs.existsSync(filePath));
+    if (sourcePath) {
+      fs.copyFileSync(sourcePath, visualSettingsPath);
+    } else {
+      fs.writeFileSync(visualSettingsPath, "{}\n", "utf8");
+    }
+  }
+  if (!fs.existsSync(visualSettingsIndexPath)) {
+    fs.writeFileSync(
+      visualSettingsIndexPath,
+      `${JSON.stringify({ activePreset: defaultVisualSettingsPreset.id, presets: [defaultVisualSettingsPreset] }, null, 2)}\n`,
+      "utf8"
+    );
+  }
+}
+
+seedVisualSettingsStore();
+
 function normalizePresetId(value, fallback = "") {
   const id = String(value || "")
     .trim()
@@ -129,7 +154,7 @@ function readVisualSettingsPreset(id) {
   const preset = readJsonFile(presetPath(safeId), null);
   if (preset) return preset;
   if (safeId === defaultVisualSettingsPreset.id) {
-    return readJsonFile(visualSettingsPath, {});
+    return readJsonFile(bundledDefaultVisualSettingsPath, readJsonFile(bundledVisualSettingsPath, {}));
   }
   return {};
 }
