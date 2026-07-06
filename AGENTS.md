@@ -33,8 +33,9 @@ implemented against each goal criterion and list remaining gaps as blockers.
   known mojibake form such as `РіРё ...`, treat it as a concrete task even when
   the message is short. First read `COMMANDS.md` when present, then read every
   runtime module routed to that command before acting.
-- For state-changing GI commands that start, stop, restart, rebuild, deploy,
-  test, install, reset, update, commit, push, or manage task-manager state, do
+- For state-changing GI commands that start, stop, restart, build, rebuild,
+  deploy, test, install, reset, update, commit, push, or manage task-manager
+  state, do
   not execute from memory, old chat examples, or a command name alone. If the
   command's routed module is unavailable, stop and report the missing path.
 - For `gi restart`, `gi reboot`, `gi docker`, `ги рестарт`, `ги ребут`,
@@ -47,6 +48,12 @@ implemented against each goal criterion and list remaining gaps as blockers.
   `patterns/AGENTS_RUNTIME/06-tool-usage-and-token-economy.md`, and the most
   relevant task module.
 - If a task crosses topics, read every matching module before acting.
+- On the first concrete task in a new chat/session, before task-specific work,
+  run a quiet GI update check: read local instruction-kit metadata and accepted
+  source version/migration artifacts only, apply pending accepted migrations
+  when the local update contract allows it, and report a compact status that
+  includes the pending migration count, including `0` when none are pending.
+  Report a compact blocker if the check cannot complete.
 - Prefer project-local instructions, runbooks, contracts, project memory, and
   service guides over shared defaults when they are more specific.
 
@@ -106,6 +113,11 @@ Use the RAG startup flow and retrieve only task-relevant context.
 - Update intake and `updates/` handling: `patterns/AGENTS_RUNTIME/14-update-intake.md`
 - Verification policy: `patterns/AGENTS_RUNTIME/15-verification.md`
 - Git policy: `patterns/AGENTS_RUNTIME/16-git-policy.md`
+- Agent role office, specialist role routing, and narrow professional scopes:
+  `patterns/AGENTS_RUNTIME/17-agent-role-office.md`
+- Startup product engineering, business-first delivery, .NET/frontend
+  expectations, and professional communication:
+  `patterns/AGENTS_RUNTIME/18-startup-product-engineering.md`
 
 ## Durable Memory
 
@@ -119,6 +131,14 @@ crawled/downloaded files, large logs, model outputs, build artifacts, export
 bundles, or run datasets in `tools/project-memory/`. Use a project-local
 artifact/evidence/output/data/docs-asset location and keep only compact
 manifests, summaries, checksums, or links in project memory when needed.
+
+Use `tools/` for durable development and agent tooling such as scripts,
+adapters, bootstrap commands, deployment helpers, and redacted examples or
+manifests. Do not use `tools/` as the default destination for generated product
+output, selected-run artifacts, uploaded site contents, screenshots, raw
+exports, build bundles, downloaded datasets, or one-off work results. Document
+the project's output, evidence, data, build, release, or docs-asset locations
+instead.
 
 General project documentation lives in `README.md`, `docs/`, and the runbook.
 Keep overview, visible functionality, stack, commands, operations, and
@@ -160,7 +180,8 @@ Inspect logs:
 
 - Source: `TODO`
 - Tests: `TODO`
-- Tools: `tools/`
+- Tools: `tools/` for durable development and agent tooling only
+- Outputs/evidence/build artifacts: `TODO`
 - Summaries: `tools/summary/`
 - Project memory: `tools/project-memory/`
 

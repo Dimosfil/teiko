@@ -7,14 +7,9 @@ tools/project-memory/vector-index/
 tools/project-memory/chroma/
 tools/project-memory/embedding-cache/
 tools/project-memory/semantic-corpus*.jsonl
-tools/summary/*.tmp
-tools/video-review-*/
 tools/project-memory/devops.local.json
-tools/deploy/deploy-gateway.local.json
+tools/summary/*.tmp
 tools/deploy/ftp.local.json
 tools/deploy/prod.local.json
+tools/deploy/deploy-gateway.local.json
 *.log
-node_modules/
-data/*.sqlite
-data/*.sqlite-*
-public/.idea/

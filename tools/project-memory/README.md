@@ -24,9 +24,15 @@ Do not store secrets or credentials here.
 Do not store raw work results, generated product outputs, screenshots, photos,
 crawled/downloaded files, large logs, model outputs, build artifacts, export
 bundles, or run datasets in this folder. Put those files in a project-local
-artifact, evidence, output, data, or docs-asset location and keep only compact
-summaries, manifests, checksums, or links here when they are needed for a
-decision, behavior contract, failure, or verification result.
+artifact, evidence, output, data, docs-asset, build, or release location and
+keep only compact summaries, manifests, checksums, or links here when they are
+needed for a decision, behavior contract, failure, or verification result.
+
+Use `tools/` for durable development and agent tooling such as scripts,
+adapters, bootstrap commands, deployment helpers, and redacted examples or
+manifests. Do not use `tools/` as the default destination for generated product
+output, selected-run artifacts, uploaded site contents, screenshots, raw
+exports, build bundles, downloaded datasets, or one-off work results.
 
 ## Documentation Versus Summary Versus Project Memory
 

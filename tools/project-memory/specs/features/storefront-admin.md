@@ -75,3 +75,9 @@ Wildberries, Yandex Market, or another configured URL.
   `public/visual-settings/<preset-id>.json`. `public/visual-settings.json`
   remains a backward-compatible default fallback only. The preset folder is the
   source of truth for git commits and FTP uploads.
+- Visual preset management and site theme publishing are separate actions. The
+  Save button inside the Preset section writes only the named preset and does
+  not change the active site theme. The top Save button publishes the current
+  selected preset/settings as the active theme used after refresh and by static
+  deploys. The backend accepts `activate=0` for preset-only writes and keeps
+  `index.activePreset` unchanged in that case.

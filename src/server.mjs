@@ -134,7 +134,7 @@ function readVisualSettingsPreset(id) {
   return {};
 }
 
-function writeVisualSettingsPreset(id, name, settings) {
+function writeVisualSettingsPreset(id, name, settings, options = {}) {
   const safeId = normalizePresetId(id || name, defaultVisualSettingsPreset.id);
   const index = readVisualSettingsIndex();
   const existing = index.presets.find((preset) => preset.id === safeId);
@@ -143,7 +143,11 @@ function writeVisualSettingsPreset(id, name, settings) {
     ...index.presets.filter((preset) => preset.id !== safeId),
     { id: safeId, name: presetName }
   ].sort((a, b) => (a.id === defaultVisualSettingsPreset.id ? -1 : b.id === defaultVisualSettingsPreset.id ? 1 : a.name.localeCompare(b.name)));
-  const nextIndex = { activePreset: safeId, presets: nextPresets };
+  const currentActivePreset = normalizePresetId(index.activePreset, defaultVisualSettingsPreset.id);
+  const activePreset = options.activate === false && nextPresets.some((preset) => preset.id === currentActivePreset)
+    ? currentActivePreset
+    : safeId;
+  const nextIndex = { activePreset, presets: nextPresets };
   fs.writeFileSync(presetPath(safeId), `${JSON.stringify(settings, null, 2)}\n`, "utf8");
   if (safeId === defaultVisualSettingsPreset.id) {
     fs.writeFileSync(visualSettingsPath, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
@@ -168,6 +172,13 @@ function canWriteVisualSettings(res) {
   return true;
 }
 
+function shouldActivateVisualSettings(req) {
+  const queryValue = String(req.query?.activate ?? "").toLowerCase();
+  if (queryValue === "0" || queryValue === "false" || queryValue === "no") return false;
+  if (req.body?.activate === false) return false;
+  return true;
+}
+
 function saveVisualSettingsRequest(req, res, presetId = req.body?.id || defaultVisualSettingsPreset.id) {
   if (!canWriteVisualSettings(res)) return;
   const settings = visualSettingsPayload(req);
@@ -175,7 +186,9 @@ function saveVisualSettingsRequest(req, res, presetId = req.body?.id || defaultV
     res.status(400).json({ error: "Visual settings payload must be an object" });
     return;
   }
-  const result = writeVisualSettingsPreset(presetId, req.body?.name, settings);
+  const result = writeVisualSettingsPreset(presetId, req.body?.name, settings, {
+    activate: shouldActivateVisualSettings(req)
+  });
   res.json(result);
 }
 

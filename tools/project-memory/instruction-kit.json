@@ -1,5 +1,5 @@
 ﻿{
-    "instruction_kit_version":  "2026.07.03.1",
+    "instruction_kit_version":  "2026.07.06.1",
     "source":  "D:\\AI\\general-instructions",
     "installed_at":  "2026-07-02T10:57:47+03:00",
     "update_check":  {
@@ -58,7 +58,11 @@
                          "patterns/AGENTS_RUNTIME/13-progress-updates.md",
                          "patterns/AGENTS_RUNTIME/14-update-intake.md",
                          "patterns/AGENTS_RUNTIME/15-verification.md",
-                         "patterns/AGENTS_RUNTIME/16-git-policy.md"
+                         "patterns/AGENTS_RUNTIME/16-git-policy.md",
+                         "patterns/AGENT_ROLE_OFFICE.md",
+                         "patterns/AGENTS_RUNTIME/17-agent-role-office.md",
+                         "patterns/STARTUP_PRODUCT_ENGINEERING.md",
+                         "patterns/AGENTS_RUNTIME/18-startup-product-engineering.md"
                      ],
     "applied_migrations":  [
                                "2026.05.16.1__add_skill_modules",
@@ -191,7 +195,23 @@
                                "2026.07.01.1__classify_development_vs_refactor",
                                "2026.06.24.6__add_local_sprint_command",
                                "2026.07.02.1__require_project_identity_before_writes",
-                               "2026.07.03.1__add_gi_docker_command"
+                               "2026.07.03.1__add_gi_docker_command",
+                               "2026.07.04.1__prefer_sftp_fallback_for_ftp_upload_failures",
+                               "2026.07.04.2__add_gi_build_command",
+                               "2026.07.04.3__log_user_reported_agent_bugs_and_tools_artifact_boundary",
+                               "2026.07.04.4__add_deploy_gateway_command",
+                               "2026.07.04.5__save_selected_deploy_gateway",
+                               "2026.07.04.6__auto_register_gateway_ftp_projects",
+                               "2026.07.04.7__add_gi_error_intake_and_startup_update_check",
+                               "2026.07.04.8__centralize_deploy_in_devops_gateway",
+                               "2026.07.04.9__check_deploy_gateway_inbox_before_mapping_block",
+                               "2026.07.04.10__report_deploy_pending_or_explicit_error",
+                               "2026.07.04.11__continue_artifact_upload_for_pending_gateway_entry",
+                               "2026.07.04.12__attempt_gateway_provisioning_after_stale_error",
+                               "2026.07.04.13__derive_project_scoped_gateway_subdomain",
+                               "2026.07.05.1__report_zero_pending_startup_migrations",
+                               "2026.07.05.2__add_agent_role_office",
+                               "2026.07.06.1__add_startup_product_engineering"
                            ],
-    "last_update_check_at":  "2026-07-04T08:36:57+03:00"
+    "last_update_check_at":  "2026-07-06T11:16:02+03:00"
 }

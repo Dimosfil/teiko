@@ -953,13 +953,35 @@ function normalizePresetList(index = {}) {
   return presets.filter((preset, index, list) => list.findIndex((item) => item.id === preset.id) === index);
 }
 
-function setVisualPresets(index = {}) {
+function mergeVisualPresetIndexes(...indexes) {
+  const presets = normalizePresetList({
+    presets: indexes.flatMap((index) => Array.isArray(index?.presets) ? index.presets : [])
+  });
+  const activePreset = indexes
+    .map((index) => normalizePresetId(index?.activePreset, ""))
+    .find((id) => presets.some((preset) => preset.id === id)) || defaultVisualPreset.id;
+  return { activePreset, presets };
+}
+
+function setVisualPresets(index = {}, selectedPresetId) {
   state.visualPresets = normalizePresetList(index);
-  const activePreset = normalizePresetId(index.activePreset, defaultVisualPreset.id);
-  state.currentVisualPreset = state.visualPresets.some((preset) => preset.id === activePreset)
-    ? activePreset
+  const selectedPreset = normalizePresetId(selectedPresetId ?? index.activePreset, defaultVisualPreset.id);
+  state.currentVisualPreset = state.visualPresets.some((preset) => preset.id === selectedPreset)
+    ? selectedPreset
     : defaultVisualPreset.id;
   renderVisualPresetControls();
+}
+
+function selectVisualPreset(preset = currentVisualPreset(), index = {}) {
+  const presetId = normalizePresetId(preset.id, defaultVisualPreset.id);
+  const presetName = normalizePresetName(preset.name, presetId);
+  const nextIndex = mergeVisualPresetIndexes(
+    index,
+    { presets: [{ id: presetId, name: presetName }] },
+    { activePreset: state.currentVisualPreset, presets: state.visualPresets }
+  );
+  setVisualPresets(nextIndex, presetId);
+  return currentVisualPreset();
 }
 
 function readStoredVisualSettings() {
@@ -981,25 +1003,48 @@ function writeStoredVisualSettings(index, settingsByPreset) {
   localStorage.setItem(visualSettingsStorageKey, JSON.stringify({ index, settingsByPreset }));
 }
 
-function storeVisualSettings(settings, preset = currentVisualPreset()) {
+function cacheVisualSettings(settings, preset = currentVisualPreset(), options = {}) {
   const stored = readStoredVisualSettings();
   const presetId = normalizePresetId(preset.id, defaultVisualPreset.id);
   const presetName = normalizePresetName(preset.name, presetId);
-  const presets = normalizePresetList({
-    presets: [
-      ...(stored?.index.presets || state.visualPresets),
-      { id: presetId, name: presetName }
-    ]
-  });
-  const index = { activePreset: presetId, presets };
+  const activateTheme = options.activateTheme !== false;
+  const activePreset = activateTheme
+    ? presetId
+    : normalizePresetId(options.index?.activePreset || stored?.index?.activePreset, defaultVisualPreset.id);
+  const index = mergeVisualPresetIndexes(
+    { activePreset, presets: [{ id: presetId, name: presetName }] },
+    options.index,
+    { activePreset: state.currentVisualPreset, presets: state.visualPresets },
+    stored?.index
+  );
   const settingsByPreset = {
     ...(stored?.settingsByPreset || {}),
     [presetId]: normalizeVisualSettings(settings)
   };
   writeStoredVisualSettings(index, settingsByPreset);
-  setVisualPresets(index);
-  state.currentVisualPreset = presetId;
-  renderVisualPresetControls();
+  selectVisualPreset({ id: presetId, name: presetName }, index);
+  return settingsByPreset[presetId];
+}
+
+function storeVisualSettings(settings, preset = currentVisualPreset(), options = {}) {
+  const stored = readStoredVisualSettings();
+  const presetId = normalizePresetId(preset.id, defaultVisualPreset.id);
+  const presetName = normalizePresetName(preset.name, presetId);
+  const activateTheme = options.activateTheme !== false;
+  const activePreset = activateTheme
+    ? presetId
+    : normalizePresetId(stored?.index?.activePreset, defaultVisualPreset.id);
+  const index = mergeVisualPresetIndexes(
+    { activePreset, presets: [{ id: presetId, name: presetName }] },
+    stored?.index,
+    { activePreset: state.currentVisualPreset, presets: state.visualPresets }
+  );
+  const settingsByPreset = {
+    ...(stored?.settingsByPreset || {}),
+    [presetId]: normalizeVisualSettings(settings)
+  };
+  writeStoredVisualSettings(index, settingsByPreset);
+  setVisualPresets(index, presetId);
   return settingsByPreset[presetId];
 }
 
@@ -1065,20 +1110,30 @@ async function loadVisualPresetSettings(presetId) {
 
 async function loadVisualSettings() {
   const stored = readStoredVisualSettings();
-  if (stored) {
-    setVisualPresets(stored.index);
-    return normalizeVisualSettings(stored.settingsByPreset[state.currentVisualPreset]);
-  }
   try {
     const data = await loadJson(visualSettingsApiPath);
-    setVisualPresets(data);
-    return normalizeVisualSettings(data.settings);
+    const index = mergeVisualPresetIndexes(data, stored?.index);
+    const activePreset = normalizePresetId(data.activePreset, index.activePreset);
+    setVisualPresets({ ...index, activePreset });
+    const settings = normalizeVisualSettings(data.settings);
+    const settingsByPreset = {
+      ...(stored?.settingsByPreset || {}),
+      [state.currentVisualPreset]: settings
+    };
+    writeStoredVisualSettings({ activePreset: state.currentVisualPreset, presets: state.visualPresets }, settingsByPreset);
+    return settings;
   } catch {
     try {
-      const index = await loadJson(visualSettingsIndexPath);
-      setVisualPresets(index);
+      const fileIndex = await loadJson(visualSettingsIndexPath);
+      const index = mergeVisualPresetIndexes(fileIndex, stored?.index);
+      const activePreset = normalizePresetId(stored?.index?.activePreset || fileIndex.activePreset, index.activePreset);
+      setVisualPresets({ ...index, activePreset });
       return await loadVisualPresetSettings(state.currentVisualPreset);
     } catch {
+      if (stored) {
+        setVisualPresets(stored.index);
+        return normalizeVisualSettings(stored.settingsByPreset[state.currentVisualPreset]);
+      }
       try {
         setVisualPresets({ activePreset: defaultVisualPreset.id, presets: [defaultVisualPreset] });
         return normalizeVisualSettings(await loadJson(visualSettingsPath));
@@ -1108,43 +1163,63 @@ function collectVisualSettings(panel) {
   });
 }
 
-async function persistVisualSettings(settings, preset = currentVisualPreset()) {
+async function persistVisualSettings(settings, preset = currentVisualPreset(), options = {}) {
   const presetId = normalizePresetId(preset.id, defaultVisualPreset.id);
   const presetName = normalizePresetName(preset.name, presetId);
+  const activateTheme = options.activateTheme !== false;
   try {
-    const response = await fetch(`${visualSettingsApiPath}/${presetId}`, {
+    const response = await fetch(`${visualSettingsApiPath}/${presetId}?activate=${activateTheme ? "1" : "0"}`, {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id: presetId, name: presetName, settings })
+      body: JSON.stringify({ id: presetId, name: presetName, activate: activateTheme, settings })
     });
     if (!response.ok) {
       const message = await response.text();
       throw new Error(message || "Visual settings save failed");
     }
     const result = await response.json();
-    if (result.index) setVisualPresets(result.index);
-    state.currentVisualPreset = result.id || presetId;
-    renderVisualPresetControls();
-    return normalizeVisualSettings(result.settings || settings);
+    const savedPreset = {
+      id: normalizePresetId(result.id || presetId, presetId),
+      name: normalizePresetName(result.name || presetName, presetName)
+    };
+    selectVisualPreset(savedPreset, result.index);
+    return cacheVisualSettings(result.settings || settings, savedPreset, { activateTheme, index: result.index });
   } catch {
-    return storeVisualSettings(settings, { id: presetId, name: presetName });
+    return storeVisualSettings(settings, { id: presetId, name: presetName }, { activateTheme });
   }
 }
 
-async function saveBackgroundDebugControls() {
+function resolveEditablePresetFromName() {
+  const nameInput = document.querySelector("[data-debug-preset-name]");
+  const selected = currentVisualPreset();
+  const presetName = normalizePresetName(nameInput?.value, selected.name);
+  const typedId = normalizePresetId(presetName, selected.id);
+  const presetId = selected.id === defaultVisualPreset.id && typedId !== defaultVisualPreset.id
+    ? uniquePresetId(typedId)
+    : selected.id;
+  return { id: presetId, name: presetName };
+}
+
+async function savePresetControls() {
   const panel = $("#backgroundDebug");
   if (!panel) return;
   const preset = collectVisualSettings(panel);
   try {
-    const nameInput = document.querySelector("[data-debug-preset-name]");
-    const selected = currentVisualPreset();
-    await persistVisualSettings(preset, {
-      id: selected.id,
-      name: normalizePresetName(nameInput?.value, selected.name)
-    });
-    setDebugSaveStatus("Preset saved.");
+    await persistVisualSettings(preset, resolveEditablePresetFromName(), { activateTheme: false });
+    setDebugSaveStatus("Preset saved. Use top Save for site theme.");
   } catch {
     setDebugSaveStatus("Save failed.");
+  }
+}
+
+async function saveThemeControls() {
+  const panel = $("#backgroundDebug");
+  if (!panel) return;
+  try {
+    await persistVisualSettings(collectVisualSettings(panel), resolveEditablePresetFromName(), { activateTheme: true });
+    setDebugSaveStatus("Theme saved.");
+  } catch {
+    setDebugSaveStatus("Theme save failed.");
   }
 }
 
@@ -1155,8 +1230,8 @@ async function saveNewVisualPreset() {
   const name = normalizePresetName(nameInput?.value, `Preset ${state.visualPresets.length + 1}`);
   const id = uniquePresetId(name);
   try {
-    await persistVisualSettings(collectVisualSettings(panel), { id, name });
-    setDebugSaveStatus("Preset created.");
+    await persistVisualSettings(collectVisualSettings(panel), { id, name }, { activateTheme: false });
+    setDebugSaveStatus("Preset created. Use top Save for site theme.");
   } catch {
     setDebugSaveStatus("Create failed.");
   }
@@ -1347,11 +1422,11 @@ function initBackgroundDebug() {
       return;
     }
     if (event.target.closest("[data-debug-save]")) {
-      void saveBackgroundDebugControls();
+      void saveThemeControls();
       return;
     }
     if (event.target.closest("[data-debug-preset-save]")) {
-      void saveBackgroundDebugControls();
+      void savePresetControls();
       return;
     }
     if (event.target.closest("[data-debug-preset-new]")) {

@@ -1,5 +1,17 @@
 ## Scope And Startup Behavior
 
+- On the first concrete task in a new chat/session, before task-specific
+  startup restore, planning, implementation, or command execution, run a
+  quiet GI instruction update check. Use the current project's
+  `tools/project-memory/instruction-kit.json` and accepted source
+  `VERSION.md`, `CHANGELOG.md`, `INDEX.md`, and pending `migrations/` files
+  only. Do not read `updates/`, old chat examples, broad project files, or
+  unrelated source repositories during this check. Apply pending accepted
+  migrations when the local update contract allows it. Report a compact status
+  that includes the pending migration count, including `0` when none are
+  pending. If the source is unavailable or a migration is blocked, report a
+  compact blocker and continue with current local instructions unless the user explicitly requested
+  `gi обновить`.
 - Treat short greetings, thanks, acknowledgements, and status-neutral messages
   as no-ops unless they include an explicit task, path, command, error, or
   project question. Do not run startup restore or read project files for those
