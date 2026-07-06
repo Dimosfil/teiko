@@ -23,7 +23,7 @@ export const seedPayload = {
     contactsText: "Откройте карточку товара и нажмите кнопку нужного маркетплейса.",
     phone: "",
     email: "",
-    logo: "/assets/logo.jpg",
+    logo: "/assets/logo-alpha.png",
     logoBack: "/assets/logo-back.jpg"
   },
   slides: [

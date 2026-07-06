@@ -11,6 +11,31 @@
   </head>
   <body>
     <header class="site-header">
+      <div class="site-header-top">
+        <div class="site-container header-top-inner">
+          <span>Ежедневно с 10:00 до 21:00</span>
+          <a href="tel:+78005003412">8 800 500-34-12</a>
+          <span>Москва, ул. Ташкентская, д. 28</span>
+          <nav class="service-nav" aria-label="Служебная навигация">
+            <a href="#about">Доставка</a>
+            <a href="#about">Оплата</a>
+            <a href="#about">Контакты</a>
+          </nav>
+        </div>
+      </div>
+      <div class="site-container site-header-main">
+        <a class="brand brand-main" href="#top" aria-label="TEIKO">
+          <img id="headerLogoMain" src="/assets/logo.jpg" alt="TEIKO" />
+        </a>
+        <label class="header-search" aria-label="Поиск по каталогу">
+          <input id="headerSearchInput" type="search" placeholder="Например: антидождь" />
+          <span aria-hidden="true">⌕</span>
+        </label>
+        <div class="header-actions" aria-label="Покупательские действия">
+          <a href="#catalog">Каталог</a>
+          <a href="#about">Где купить</a>
+        </div>
+      </div>
       <a class="brand" href="#top" aria-label="TEIKO">
         <img id="headerLogo" src="/assets/logo.jpg" alt="TEIKO" />
       </a>
@@ -132,6 +157,7 @@
             </g>
           </g>
         </svg>
+        <div class="site-container hero-shell">
         <div class="hero-carousel" id="heroCarousel" aria-roledescription="carousel">
           <div class="hero-viewport">
             <div class="hero-track" id="heroTrack"></div>
@@ -146,6 +172,11 @@
             <div class="hero-progress" id="heroProgress" aria-hidden="true"></div>
           </div>
         </div>
+        </div>
+      </section>
+
+      <section class="category-showcase" aria-label="Р Р°Р·РґРµР»С‹ РєР°С‚Р°Р»РѕРіР°">
+        <div class="category-showcase-grid" id="categoryShowcase"></div>
       </section>
 
       <section class="catalog-section" id="catalog">
@@ -153,7 +184,7 @@
           <div class="section-head">
             <div>
               <p class="eyebrow">Каталог</p>
-              <h2>Товары TEIKO</h2>
+              <h2 id="catalogTitle">Товары TEIKO</h2>
             </div>
             <label class="search">
               <span>Поиск</span>
@@ -192,298 +223,116 @@
     </button>
     <aside class="debug-panel" id="backgroundDebug" aria-label="Background debug controls" hidden>
       <div class="debug-panel-head">
-        <strong>BG Debug</strong>
+        <strong>BG</strong>
         <div class="debug-panel-actions">
           <button type="button" data-debug-save>Save</button>
           <button type="button" data-debug-reset>Reset</button>
         </div>
         <span class="debug-save-status" data-debug-save-status aria-live="polite"></span>
       </div>
-      <section class="debug-layer debug-preset-layer" aria-label="Visual preset controls">
+      <section class="debug-layer" data-debug-section="background" aria-label="Background color controls">
         <div class="debug-layer-title">
-          <span>Preset</span>
-          <span data-debug-preset-current>Default</span>
-        </div>
-        <label class="debug-preset-control">
-          <span>Use</span>
-          <select data-debug-preset-select></select>
-        </label>
-        <label class="debug-preset-control">
-          <span>Name</span>
-          <input type="text" value="Default" maxlength="48" data-debug-preset-name />
-        </label>
-        <div class="debug-button-row">
-          <button class="debug-mode-button" type="button" data-debug-preset-load>Load</button>
-          <button class="debug-mode-button" type="button" data-debug-preset-save>Save</button>
-          <button class="debug-mode-button" type="button" data-debug-preset-new>New</button>
-        </div>
-      </section>
-      <section class="debug-layer" data-debug-section="mode" aria-label="Hero mode controls">
-        <div class="debug-layer-title">
-          <span>Mode</span>
-          <span>Layout</span>
-        </div>
-        <div class="debug-button-row">
-          <button
-            class="debug-mode-button"
-            id="heroLayoutToggle"
-            type="button"
-            aria-pressed="false"
-            aria-label="Toggle hero layout"
-          >
-            Mode: Current
-          </button>
-          <button
-            class="debug-mode-button"
-            id="slideToneToggle"
-            type="button"
-            aria-pressed="false"
-            aria-label="Toggle carousel slide monochrome"
-          >
-            Slides: Color
-          </button>
-          <button
-            class="debug-mode-button"
-            id="slideMotionToggle"
-            type="button"
-            aria-pressed="false"
-            aria-label="Toggle carousel motion mode"
-          >
-            Motion: Fade
-          </button>
-        </div>
-      </section>
-      <section class="debug-layer" data-debug-section="background" aria-label="Background layer controls">
-        <div class="debug-layer-title">
-          <span>Back</span>
-          <span data-debug-readout="background-base">#ffffff</span>
+          <span>BG</span>
+          <span>Colors</span>
         </div>
         <label class="debug-color-control">
-          <span>White</span>
+          <span>White BG</span>
           <input type="color" value="#ffffff" data-debug-layer="background" data-debug-prop="base" />
           <span class="debug-color-chip" data-debug-chip="background-base"></span>
         </label>
         <label class="debug-color-control">
-          <span>Green</span>
+          <span>Green BG</span>
           <input type="color" value="#eff7ee" data-debug-layer="background" data-debug-prop="tint" />
           <span class="debug-color-chip" data-debug-chip="background-tint"></span>
         </label>
       </section>
-      <section class="debug-layer" data-debug-section="text" aria-label="Text layer controls">
+      <section class="debug-layer" data-debug-section="logo" aria-label="Header logo controls">
         <div class="debug-layer-title">
-          <span>Text</span>
-          <span data-debug-readout="text-colorLight">#050505</span>
+          <span>Logo</span>
+          <span data-debug-readout="logo-width">164px</span>
         </div>
-        <div class="debug-button-row is-single">
-          <button
-            class="debug-mode-button"
-            id="textMotionToggle"
-            type="button"
-            aria-pressed="true"
-            aria-label="Toggle text rim light"
-          >
-            Rim Light
-          </button>
-        </div>
-        <div class="debug-button-row is-five">
-          <button class="debug-mode-button" type="button" data-text-highlight-variant="knife" aria-pressed="true" aria-label="Use rim light variant 1">
-            Rim 1
-          </button>
-          <button class="debug-mode-button" type="button" data-text-highlight-variant="soft" aria-pressed="false" aria-label="Use rim light variant 2">
-            Rim 2
-          </button>
-          <button class="debug-mode-button" type="button" data-text-highlight-variant="split" aria-pressed="false" aria-label="Use rim light variant 3">
-            Rim 3
-          </button>
-          <button class="debug-mode-button" type="button" data-text-highlight-variant="edge" aria-pressed="false" aria-label="Use rim light variant 4">
-            Rim 4
-          </button>
-          <button class="debug-mode-button" type="button" data-text-highlight-variant="wipe" aria-pressed="false" aria-label="Use text wipe highlight">
-            Wipe
-          </button>
-        </div>
-        <label class="debug-color-control">
-          <span>Light</span>
-          <input type="color" value="#050505" data-debug-layer="text" data-debug-prop="colorLight" />
-          <span class="debug-color-chip" data-debug-chip="text-colorLight"></span>
+        <label class="debug-control">
+          <span>Width</span>
+          <input type="range" min="80" max="260" step="1" value="164" data-debug-layer="logo" data-debug-prop="width" />
+          <output data-debug-readout="logo-width">164px</output>
         </label>
-        <label class="debug-color-control">
-          <span>Dark</span>
-          <input type="color" value="#ffffff" data-debug-layer="text" data-debug-prop="colorDark" />
-          <span class="debug-color-chip" data-debug-chip="text-colorDark"></span>
+        <label class="debug-control">
+          <span>Height</span>
+          <input type="range" min="28" max="100" step="1" value="52" data-debug-layer="logo" data-debug-prop="height" />
+          <output data-debug-readout="logo-height">52px</output>
         </label>
         <label class="debug-control">
           <span>Scale</span>
-          <input type="range" min="0.5" max="1.8" step="0.01" value="1" data-debug-layer="text" data-debug-prop="scale" />
-          <output data-debug-readout="text-scale">1.00</output>
-        </label>
-        <label class="debug-control">
-          <span>Speed</span>
-          <input type="range" min="0.25" max="3" step="0.05" value="1" data-debug-layer="text" data-debug-prop="frequency" />
-          <output data-debug-readout="text-frequency">1.00x</output>
-        </label>
-        <label class="debug-control">
-          <span>Freq</span>
-          <input type="range" min="0.2" max="4" step="0.05" value="1" data-debug-layer="text" data-debug-prop="repeat" />
-          <output data-debug-readout="text-repeat">1.00x</output>
+          <input type="range" min="0.5" max="1.8" step="0.01" value="1" data-debug-layer="logo" data-debug-prop="scale" />
+          <output data-debug-readout="logo-scale">1.00</output>
         </label>
         <label class="debug-control">
           <span>X</span>
-          <input type="range" min="-240" max="240" step="1" value="0" data-debug-layer="text" data-debug-prop="x" />
-          <output data-debug-readout="text-x">0px</output>
+          <input type="range" min="-120" max="120" step="1" value="0" data-debug-layer="logo" data-debug-prop="x" />
+          <output data-debug-readout="logo-x">0px</output>
         </label>
         <label class="debug-control">
           <span>Y</span>
-          <input type="range" min="-180" max="180" step="1" value="0" data-debug-layer="text" data-debug-prop="y" />
-          <output data-debug-readout="text-y">0px</output>
-        </label>
-      </section>
-      <section class="debug-layer" data-debug-section="grid" aria-label="Grid layer controls">
-        <div class="debug-layer-title">
-          <span>Grid</span>
-          <span data-debug-readout="grid-color">#48b45a</span>
-        </div>
-        <div class="debug-button-row is-single">
-          <button
-            class="debug-mode-button"
-            id="gridMotionToggle"
-            type="button"
-            aria-pressed="true"
-            aria-label="Toggle grid motion"
-          >
-            Grid: Motion
-          </button>
-        </div>
-        <div class="debug-button-row">
-          <button class="debug-mode-button" type="button" data-grid-variant="original" aria-pressed="true" aria-label="Use grid variant 1">
-            Grid 1
-          </button>
-          <button class="debug-mode-button" type="button" data-grid-variant="dense" aria-pressed="false" aria-label="Use grid variant 2">
-            Grid 2
-          </button>
-          <button class="debug-mode-button" type="button" data-grid-variant="wave" aria-pressed="false" aria-label="Use grid variant 3">
-            Grid 3
-          </button>
-        </div>
-        <label class="debug-color-control">
-          <span>Color</span>
-          <input type="color" value="#48b45a" data-debug-layer="grid" data-debug-prop="color" />
-          <span class="debug-color-chip" data-debug-chip="grid"></span>
-        </label>
-        <label class="debug-control">
-          <span>Scale</span>
-          <input type="range" min="0.55" max="1.9" step="0.01" value="1" data-debug-layer="grid" data-debug-prop="scale" />
-          <output data-debug-readout="grid-scale">1.00</output>
-        </label>
-        <label class="debug-control">
-          <span>X</span>
-          <input type="range" min="-280" max="280" step="1" value="0" data-debug-layer="grid" data-debug-prop="x" />
-          <output data-debug-readout="grid-x">0px</output>
-        </label>
-        <label class="debug-control">
-          <span>Y</span>
-          <input type="range" min="-220" max="220" step="1" value="0" data-debug-layer="grid" data-debug-prop="y" />
-          <output data-debug-readout="grid-y">0px</output>
+          <input type="range" min="-80" max="80" step="1" value="0" data-debug-layer="logo" data-debug-prop="y" />
+          <output data-debug-readout="logo-y">0px</output>
         </label>
       </section>
       <section class="debug-layer" data-debug-section="carousel" aria-label="Carousel transform controls">
         <div class="debug-layer-title">
           <span>Carousel</span>
-          <span>Transform</span>
-        </div>
-        <div class="debug-button-row is-single">
-          <button
-            class="debug-mode-button"
-            id="heroAutoPauseToggle"
-            type="button"
-            aria-pressed="true"
-            aria-label="Toggle carousel auto pause"
-          >
-            Auto Pause
-          </button>
+          <span data-debug-readout="carousel-scale">1.00</span>
         </div>
         <label class="debug-control">
           <span>Scale</span>
-          <input type="range" min="0.5" max="1.6" step="0.01" value="1" data-debug-layer="carousel" data-debug-prop="scale" />
+          <input type="range" min="0.75" max="1.25" step="0.01" value="1" data-debug-layer="carousel" data-debug-prop="scale" />
           <output data-debug-readout="carousel-scale">1.00</output>
         </label>
         <label class="debug-control">
           <span>X</span>
-          <input type="range" min="-420" max="420" step="1" value="0" data-debug-layer="carousel" data-debug-prop="x" />
+          <input type="range" min="-160" max="160" step="1" value="0" data-debug-layer="carousel" data-debug-prop="x" />
           <output data-debug-readout="carousel-x">0px</output>
         </label>
         <label class="debug-control">
           <span>Y</span>
-          <input type="range" min="-360" max="360" step="1" value="0" data-debug-layer="carousel" data-debug-prop="y" />
+          <input type="range" min="-120" max="120" step="1" value="0" data-debug-layer="carousel" data-debug-prop="y" />
           <output data-debug-readout="carousel-y">0px</output>
         </label>
         <label class="debug-control">
-          <span>Cards</span>
-          <input type="number" min="3" max="9" step="1" value="5" data-debug-layer="carousel" data-debug-prop="cards" />
-          <output data-debug-readout="carousel-cards">5</output>
-        </label>
-        <label class="debug-control">
           <span>Gap</span>
-          <input type="range" min="0" max="120" step="1" value="48" data-debug-layer="carousel" data-debug-prop="gap" />
-          <output data-debug-readout="carousel-gap">48px</output>
+          <input type="range" min="0" max="120" step="1" value="0" data-debug-layer="carousel" data-debug-prop="gap" />
+          <output data-debug-readout="carousel-gap">0px</output>
         </label>
       </section>
-      <section class="debug-layer" data-debug-section="glass" aria-label="Glass layer controls">
+      <section class="debug-layer" data-debug-section="categories" aria-label="Category image style controls">
         <div class="debug-layer-title">
-          <span>Glass</span>
-          <span>Panel</span>
+          <span>Categories</span>
+          <span>Images</span>
         </div>
-        <label class="debug-control">
-          <span>Alpha</span>
-          <input type="range" min="0.08" max="0.82" step="0.01" value="0.46" data-debug-layer="glass" data-debug-prop="alpha" />
-          <output data-debug-readout="glass-alpha">0.46</output>
-        </label>
-        <label class="debug-control">
-          <span>Blur</span>
-          <input type="range" min="0" max="36" step="1" value="18" data-debug-layer="glass" data-debug-prop="blur" />
-          <output data-debug-readout="glass-blur">18px</output>
-        </label>
+        <div class="debug-button-row">
+          <button class="debug-mode-button" type="button" data-category-image-mode="original" aria-pressed="true">Original</button>
+          <button class="debug-mode-button" type="button" data-category-image-mode="tinted" aria-pressed="false">Tinted</button>
+        </div>
       </section>
-      <section class="debug-layer" data-debug-section="catalog" aria-label="Catalog transform controls">
+      <section class="debug-layer" data-debug-section="catalogTitle" aria-label="Catalog title controls">
         <div class="debug-layer-title">
           <span>Catalog</span>
-          <span>Transform</span>
+          <span>Title</span>
         </div>
-        <label class="debug-control">
-          <span>Scale</span>
-          <input type="range" min="0.72" max="1.28" step="0.01" value="1" data-debug-layer="catalog" data-debug-prop="scale" />
-          <output data-debug-readout="catalog-scale">1.00</output>
+        <label class="debug-text-control">
+          <span>Text</span>
+          <input type="text" value="Товары TEIKO" data-debug-layer="catalogTitle" data-debug-prop="text" />
         </label>
-        <label class="debug-control">
-          <span>X</span>
-          <input type="range" min="-260" max="260" step="1" value="0" data-debug-layer="catalog" data-debug-prop="x" />
-          <output data-debug-readout="catalog-x">0px</output>
+        <label class="debug-color-control">
+          <span>Color</span>
+          <input type="color" value="#050505" data-debug-layer="catalogTitle" data-debug-prop="color" />
+          <span class="debug-color-chip" data-debug-chip="catalogTitle"></span>
         </label>
-        <label class="debug-control">
-          <span>Y</span>
-          <input type="range" min="-260" max="260" step="1" value="0" data-debug-layer="catalog" data-debug-prop="y" />
-          <output data-debug-readout="catalog-y">0px</output>
-        </label>
-      </section>
-      <section class="debug-layer" data-debug-section="info" aria-label="Info transform controls">
-        <div class="debug-layer-title">
-          <span>Info</span>
-          <span>Transform</span>
-        </div>
-        <label class="debug-control">
-          <span>Scale</span>
-          <input type="range" min="0.72" max="1.28" step="0.01" value="1" data-debug-layer="info" data-debug-prop="scale" />
-          <output data-debug-readout="info-scale">1.00</output>
-        </label>
-        <label class="debug-control">
-          <span>X</span>
-          <input type="range" min="-260" max="260" step="1" value="0" data-debug-layer="info" data-debug-prop="x" />
-          <output data-debug-readout="info-x">0px</output>
-        </label>
-        <label class="debug-control">
-          <span>Y</span>
-          <input type="range" min="-260" max="260" step="1" value="0" data-debug-layer="info" data-debug-prop="y" />
-          <output data-debug-readout="info-y">0px</output>
+        <label class="debug-text-control">
+          <span>Font</span>
+          <select data-debug-layer="catalogTitle" data-debug-prop="font">
+            <option value="default">Default</option>
+            <option value="teiko">TEIKO style</option>
+          </select>
         </label>
       </section>
     </aside>

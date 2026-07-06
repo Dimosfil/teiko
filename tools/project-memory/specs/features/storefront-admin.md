@@ -10,18 +10,20 @@ Wildberries, Yandex Market, or another configured URL.
 ## Public Workflow
 
 1. Visitor opens the public site.
-2. Hero section shows brand copy and uses `logo-back` as the visual brand layer.
-3. The public hero supports two local visual layouts: the current layered
-   background mode and a header mode. Header mode keeps only the Back layer as
-   the page background, moves the Text logo and Grid/molecule layers into the
-   hero header above the carousel, and shifts the carousel lower.
-4. Hero slides render as a closed carousel: the active slide is centered, nearby
-   previous/next slides stay visible, and navigation wraps from the last slide
-   back to the first without exposing an empty edge. The carousel has a
-   browser-local color/mono tone toggle for slide imagery and a motion toggle:
-   `Fade` keeps the soft whole-window appearance, while `Focus` animates the
-   central card shrinking into a neighbor slot as the incoming neighbor grows
-   into the center.
+2. The public shell uses a store-style structure: dark service topbar, main
+   header with logo, catalog search, and buyer links, then the promo hero.
+   Do not render a second header-level category navigation row because category
+   entry points now live in the image-card section before the product module.
+3. Main content is constrained by a Grass-like centered container so wide
+   screens keep side margins instead of stretching every section edge to edge.
+4. Hero slides render as a single large Leraton-style promo banner inside that
+   constrained container. The carousel is a plain full-width horizontal track:
+   each slide is exactly one viewport of the hero, and changing slides only
+   translates the track by one slide width. Navigation wraps from the last slide
+   back to the first without scaling, focus-card animation, neighboring cards,
+   or other visual carousel effects.
+   The legacy debug motion controls may still exist in the tool panel, but the
+   public hero layout must ignore scale/focus-card effects.
    Hovering an actual slide card temporarily pauses autoplay and freezes the
    progress bar at the current point; moving into the gap between cards or
    leaving the card resumes from the remaining time instead of restarting or
@@ -30,8 +32,22 @@ Wildberries, Yandex Market, or another configured URL.
    non-negative gap between them; the card count is capped by the number of
    available active slides, and card widths are recalculated from that count so
    a wider carousel window does not require overlapping cards.
-5. Visitor selects a slide, filters by category, searches products, or opens a
+   The active first promo slide is the KRYTEX Blue Sky mountain/car banner
+   (`/uploads/hero/krytex-perfume-blue-sky.png`) unless the admin changes slide
+   ordering.
+5. Visitor selects a slide, filters by category, searches products from the
+   header or catalog search fields, or opens a
    product card.
+   Before the product module, category entry points render as Grass-like image
+   cards with generated thematic images only; category names and counts remain
+   in the compact pill filters inside the product module so the text is not
+   duplicated. The debug/settings panel can switch category image cards between
+   the default `original` image mode and a `tinted` mode with the colored overlay
+   effect.
+   The catalog heading is controlled by visual settings: users can change the
+   heading text, color, and font mode. `default` keeps the current heading
+   typography; `TEIKO` style keeps regular text readable and renders `TEIKO`
+   substrings with the transparent logo asset.
 6. Product details show description, price, specs, and all configured
    marketplace links.
 7. Visitor clicks a marketplace link and leaves the site to complete purchase.
@@ -65,13 +81,15 @@ Wildberries, Yandex Market, or another configured URL.
 - The public storefront must not link to the admin path.
 - Uploaded images are product/site assets, not project memory.
 - Hero debug settings are project-file-backed preview controls. Back, Glass,
-  Text, Grid, carousel transform, carousel visible-card count and gap, catalog
-  panel transform, info/about transform, selected hero layout, slide color/mono
-  tone, carousel motion mode, Text contour-glint motion on/off mode, Grid
-  motion on/off mode, and the drag-reordered debug menu section order are
-  previewed immediately. They become durable when the debug panel writes a named
-  preset through the local backend. `public/visual-settings/index.json` stores
-  the active preset and preset list; each preset lives as
+  Text, Grid, header-logo width/height/scale/offset, carousel transform,
+  carousel visible-card count and gap, category image style, catalog-title text,
+  catalog-title color/font, catalog panel transform, info/about transform,
+  selected hero layout, slide color/mono tone, carousel motion mode, Text
+  contour-glint motion on/off mode, Grid motion on/off mode, and the
+  drag-reordered debug menu section order are previewed immediately. They become
+  durable when the debug panel writes a named preset through the local backend.
+  `public/visual-settings/index.json` stores the active preset and preset list;
+  each preset lives as
   `public/visual-settings/<preset-id>.json`. `public/visual-settings.json`
   remains a backward-compatible default fallback only. The preset folder is the
   source of truth for git commits and FTP uploads.

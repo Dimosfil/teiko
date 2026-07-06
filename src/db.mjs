@@ -149,7 +149,7 @@ export function getSettings() {
     contactsText: "Откройте карточку товара и выберите удобный маркетплейс.",
     phone: "",
     email: "",
-    logo: "/assets/logo.jpg",
+    logo: "/assets/logo-alpha.png",
     logoBack: "/assets/logo-back.jpg"
   };
   const rows = query("select key, value from settings");

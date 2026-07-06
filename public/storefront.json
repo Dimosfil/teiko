@@ -11,18 +11,18 @@
     "contactsText": "Откройте карточку товара и нажмите кнопку нужного маркетплейса.",
     "phone": "",
     "email": "",
-    "logo": "/assets/logo.jpg",
+    "logo": "/assets/logo-alpha.png",
     "logoBack": "/assets/logo-back.jpg"
   },
   "slides": [
     {
-      "id": 1,
+      "id": 3,
       "eyebrow": " ",
       "title": " ",
       "text": " ",
       "ctaLabel": "",
       "ctaHref": "#catalog",
-      "image": "/uploads/hero/krytex-mega-glass.png",
+      "image": "/uploads/hero/krytex-perfume-blue-sky.png",
       "sortOrder": 1,
       "isActive": true
     },
@@ -38,13 +38,13 @@
       "isActive": true
     },
     {
-      "id": 3,
+      "id": 1,
       "eyebrow": " ",
       "title": " ",
       "text": " ",
       "ctaLabel": "",
       "ctaHref": "#catalog",
-      "image": "/uploads/hero/krytex-perfume-blue-sky.png",
+      "image": "/uploads/hero/krytex-mega-glass.png",
       "sortOrder": 3,
       "isActive": true
     },

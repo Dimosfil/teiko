@@ -19,6 +19,7 @@ const state = {
   rimRepeat: 1,
   gridMotion: "on",
   gridVariant: "original",
+  categoryImageMode: "original",
   heroCarouselCards: 5,
   heroTransitionTimer: 0,
   rimPulseTimer: 0,
@@ -32,41 +33,23 @@ const backgroundDebugDefaults = {
     base: "#ffffff",
     tint: "#eff7ee"
   },
-  glass: {
-    alpha: 0.46,
-    blur: 18
+  logo: {
+    width: 164,
+    height: 52,
+    scale: 1,
+    x: 0,
+    y: 0
   },
   carousel: {
     scale: 1,
     x: 0,
     y: 0,
-    cards: 5,
-    gap: 48
+    gap: 0
   },
-  catalog: {
-    scale: 1,
-    x: 0,
-    y: 0
-  },
-  info: {
-    scale: 1,
-    x: 0,
-    y: 0
-  },
-  text: {
-    colorLight: "#050505",
-    colorDark: "#ffffff",
-    scale: 1,
-    frequency: 1,
-    repeat: 1,
-    x: 0,
-    y: 0
-  },
-  grid: {
-    color: "#48b45a",
-    scale: 1,
-    x: 0,
-    y: 0
+  catalogTitle: {
+    text: "Товары TEIKO",
+    color: "#050505",
+    font: "default"
   }
 };
 
@@ -78,9 +61,19 @@ const storefrontStaticPath = "/storefront.json";
 const visualSettingsStorageKey = "teiko.visualSettings.v1";
 const defaultVisualPreset = { id: "default", name: "Default" };
 const heroSlideDelay = 5200;
-const debugSectionDefaultOrder = ["mode", "background", "text", "grid", "carousel", "glass", "catalog", "info"];
+const debugSectionDefaultOrder = ["background", "logo", "carousel", "categories", "catalogTitle"];
 const textHighlightVariants = ["knife", "soft", "split", "edge", "wipe"];
 const gridVariants = ["original", "dense", "wave"];
+const allCategoryLabel = "Все";
+const categoryPalette = ["#5bc260", "#f4a6ca", "#ff8d3a", "#b79af5", "#5f6368", "#17b9d4", "#e7da78"];
+const categoryImages = {
+  "Все": "/assets/categories/all-products.webp",
+  "Антидождь": "/assets/categories/antirain.webp",
+  "Салон": "/assets/categories/interior.webp",
+  "Детейлинг": "/assets/categories/detailing.webp",
+  "Стекла": "/assets/categories/glass.webp",
+  "Ароматы": "/assets/categories/aromas.webp"
+};
 
 const $ = (selector) => document.querySelector(selector);
 const money = (value) =>
@@ -93,6 +86,35 @@ const escapeHtml = (value) =>
     "\"": "&quot;",
     "'": "&#39;"
   })[char]);
+
+function debugControlValue(layer, prop, fallback) {
+  const control = document.querySelector(`[data-debug-layer="${layer}"][data-debug-prop="${prop}"]`);
+  return control ? control.value : fallback;
+}
+
+function renderCatalogTitle(textValue, fontValue) {
+  const title = $("#catalogTitle");
+  if (!title) return;
+  const text = String(textValue || backgroundDebugDefaults.catalogTitle.text);
+  const font = fontValue || debugControlValue("catalogTitle", "font", backgroundDebugDefaults.catalogTitle.font);
+  const useTeikoLogo = font === "teiko";
+  title.classList.toggle("catalog-title-font-teiko", useTeikoLogo);
+  title.classList.toggle("catalog-title-font-default", !useTeikoLogo);
+  if (!useTeikoLogo) {
+    title.textContent = text;
+    return;
+  }
+  const parts = text.split(/(TEIKO)/gi);
+  title.innerHTML = parts
+    .filter((part) => part.length)
+    .map((part) => {
+      if (part.toUpperCase() === "TEIKO") {
+        return `<span class="catalog-title-logo" role="img" aria-label="${escapeHtml(part)}"></span>`;
+      }
+      return `<span class="catalog-title-text">${escapeHtml(part)}</span>`;
+    })
+    .join("");
+}
 
 function setText(id, value) {
   const node = document.getElementById(id);
@@ -114,13 +136,13 @@ function isPublicSlide(slide) {
 }
 
 function categories() {
-  return ["Все", ...new Set(state.products.map((product) => product.category).filter(Boolean))];
+  return [allCategoryLabel, ...new Set(state.products.map((product) => product.category).filter(Boolean))];
 }
 
 function filteredProducts() {
   const query = state.query.trim().toLowerCase();
   return state.products.filter((product) => {
-    const categoryMatches = state.category === "Все" || product.category === state.category;
+    const categoryMatches = state.category === allCategoryLabel || product.category === state.category;
     const textMatches = [product.title, product.description, product.shortDescription, product.brand, product.category, product.sku]
       .join(" ")
       .toLowerCase()
@@ -129,9 +151,33 @@ function filteredProducts() {
   });
 }
 
+function productCountLabel(count) {
+  const value = Math.abs(Number(count) || 0);
+  const lastTwo = value % 100;
+  const last = value % 10;
+  if (lastTwo >= 11 && lastTwo <= 14) return `${count} товаров`;
+  if (last === 1) return `${count} товар`;
+  if (last >= 2 && last <= 4) return `${count} товара`;
+  return `${count} товаров`;
+}
+
+function categoryMeta(category, index) {
+  const products = category === allCategoryLabel
+    ? state.products
+    : state.products.filter((product) => product.category === category);
+  const featured = products[0] || {};
+  return {
+    count: products.length,
+    image: categoryImages[category] || featured.image || state.settings.logoBack || "/assets/logo-back-motif.png",
+    accent: categoryPalette[index % categoryPalette.length]
+  };
+}
+
 function renderSettings() {
   document.title = state.settings.siteName || "TEIKO";
-  $("#headerLogo").src = state.settings.logo || "/assets/logo.jpg";
+  $("#headerLogo").src = state.settings.logo || "/assets/logo-alpha.png";
+  const headerLogoMain = $("#headerLogoMain");
+  if (headerLogoMain) headerLogoMain.src = state.settings.logo || "/assets/logo-alpha.png";
   $("#heroBack").src = state.settings.logoBack || "/assets/logo-back-motif.png";
   setText("aboutTitle", state.settings.aboutTitle);
   setText("aboutText", state.settings.aboutText);
@@ -191,12 +237,7 @@ function syncHeroCarouselCardCount() {
 }
 
 function heroSlideCard(slide, index, offset = 0, edge = "") {
-  const distance = Math.abs(offset);
-  const positionClass = offset === 0
-    ? "is-active"
-    : distance === 1
-      ? "is-near"
-      : "is-far";
+  const positionClass = index === state.activeSlide ? "is-active" : "";
   if (slide.isTransparent) {
     const fallbackImage = imageUrl(state.settings.logoBack);
     return `
@@ -238,6 +279,10 @@ function heroSlideCard(slide, index, offset = 0, edge = "") {
 function renderHeroPosition() {
   const track = $("#heroTrack");
   if (!track) return;
+  track.style.transform = `translate3d(${-state.activeSlide * 100}%, 0, 0)`;
+  track.querySelectorAll(".hero-slide-card").forEach((slide, index) => {
+    slide.classList.toggle("is-active", index === state.activeSlide);
+  });
   $("#heroDots").innerHTML = state.slides
     .map(
       (_, index) => `
@@ -252,16 +297,8 @@ function renderHeroPosition() {
 function renderHeroCarousel() {
   const track = $("#heroTrack");
   if (!track) return;
-  syncHeroCarouselCardCount();
-  const offsets = heroCarouselOffsets();
-  const leftEdge = offsets[0];
-  const rightEdge = offsets[offsets.length - 1];
-  track.innerHTML = offsets
-    .map((offset) => {
-      const slideIndex = wrapSlideIndex(state.activeSlide + offset);
-      const edge = offset === leftEdge ? "left" : offset === rightEdge ? "right" : "";
-      return heroSlideCard(state.slides[slideIndex], slideIndex, offset, edge);
-    })
+  track.innerHTML = state.slides
+    .map((slide, index) => heroSlideCard(slide, index))
     .join("");
   renderHeroPosition();
 }
@@ -288,10 +325,8 @@ function animateHeroSlideChange(direction) {
 function setActiveSlide(index) {
   if (!state.slides.length) return;
   const nextSlide = wrapSlideIndex(index);
-  const direction = heroSlideDirection(state.activeSlide, nextSlide);
   state.activeSlide = nextSlide;
-  renderHeroCarousel();
-  animateHeroSlideChange(direction);
+  renderHeroPosition();
   startHeroCarousel(true);
 }
 
@@ -629,12 +664,57 @@ function setGridVariant(variant) {
   setDebugSaveStatus("Preview changed. Save to keep.");
 }
 
+function normalizeCategoryImageMode(value) {
+  return value === "tinted" ? "tinted" : "original";
+}
+
+function updateCategoryImageModeButtons() {
+  document.querySelectorAll("[data-category-image-mode]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.categoryImageMode === state.categoryImageMode));
+  });
+}
+
+function applyCategoryImageMode(value) {
+  state.categoryImageMode = normalizeCategoryImageMode(value);
+  const showcase = $("#categoryShowcase");
+  if (showcase) {
+    showcase.classList.toggle("category-images-original", state.categoryImageMode === "original");
+    showcase.classList.toggle("category-images-tinted", state.categoryImageMode !== "original");
+  }
+  updateCategoryImageModeButtons();
+}
+
+function setCategoryImageMode(value) {
+  applyCategoryImageMode(value);
+  setDebugSaveStatus("Preview changed. Save to keep.");
+}
+
+function categoryCard(category, index) {
+  const meta = categoryMeta(category, index);
+  return `
+    <button class="category-card ${category === state.category ? "active" : ""}" type="button" data-category="${escapeHtml(category)}" style="--category-accent: ${meta.accent}" aria-label="${escapeHtml(`${category}: ${productCountLabel(meta.count)}`)}">
+      <span class="category-card-media">
+        <img src="${imageUrl(meta.image)}" alt="" loading="lazy" />
+      </span>
+    </button>
+  `;
+}
+
+function renderCategoryShowcase() {
+  const showcase = $("#categoryShowcase");
+  if (!showcase) return;
+  showcase.innerHTML = categories().map(categoryCard).join("");
+  applyCategoryImageMode(state.categoryImageMode);
+}
+
 function renderCategories() {
-  $("#categories").innerHTML = categories()
+  const row = $("#categories");
+  if (!row) return;
+  row.innerHTML = categories()
     .map(
       (category) => `
-        <button class="${category === state.category ? "active" : ""}" type="button" data-category="${category}">
-          ${category}
+        <button class="${category === state.category ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
+          ${escapeHtml(category)}
         </button>
       `
     )
@@ -773,6 +853,33 @@ function applyBackgroundDebugValue(layer, prop, value) {
   const catalogPanel = $(".catalog-panel");
   const aboutSection = $(".about");
   const heroCarousel = $("#heroCarousel");
+  if (layer === "catalogTitle") {
+    const title = $("#catalogTitle");
+    if (!title) return;
+    if (prop === "text") {
+      renderCatalogTitle(value, debugControlValue("catalogTitle", "font", backgroundDebugDefaults.catalogTitle.font));
+      return;
+      title.textContent = value || "Товары TEIKO";
+      return;
+    }
+    if (prop === "color") {
+      const color = String(value || "#050505").toLowerCase();
+      title.style.setProperty("--catalog-title-color", color);
+      updateDebugReadout(layer, prop, color);
+      return;
+    }
+    if (prop === "font") {
+      renderCatalogTitle(debugControlValue("catalogTitle", "text", backgroundDebugDefaults.catalogTitle.text), value);
+      return;
+    }
+  }
+  if (layer === "logo") {
+    const numericValue = Number(value);
+    const cssValue = prop === "scale" ? String(numericValue) : `${numericValue}px`;
+    document.documentElement.style.setProperty(`--header-logo-${prop}`, cssValue);
+    updateDebugReadout(layer, prop, numericValue);
+    return;
+  }
   if (["carousel", "catalog", "info"].includes(layer)) {
     const target = layer === "carousel"
       ? heroCarousel
@@ -885,8 +992,6 @@ function normalizeBackgroundDebugPreset(input) {
       if (input[layer][prop] !== undefined) preset[layer][prop] = input[layer][prop];
     });
   });
-  preset.carousel.cards = carouselCardCount(preset.carousel.cards);
-  preset.carousel.gap = carouselGapValue(preset.carousel.gap);
   return preset;
 }
 
@@ -1077,6 +1182,7 @@ function normalizeVisualSettings(input = {}) {
     textHighlightVariant: normalizeTextHighlightVariant(input.textHighlightVariant),
     gridMotion: normalizeGridMotion(input.gridMotion),
     gridVariant: normalizeGridVariant(input.gridVariant),
+    categoryImageMode: normalizeCategoryImageMode(input.categoryImageMode),
     debugSectionOrder: normalizeDebugSectionOrder(input.debugSectionOrder)
   };
 }
@@ -1149,18 +1255,11 @@ async function loadVisualSettings() {
 }
 
 function collectVisualSettings(panel) {
-  return normalizeVisualSettings({
+  return {
     debug: collectBackgroundDebugControls(panel),
-    heroLayout: state.heroLayout,
-    heroSlidesTone: state.heroSlidesTone,
-    heroMotion: state.heroMotion,
-    heroAutoPause: state.heroAutoPause,
-    textMotion: state.textMotion,
-    textHighlightVariant: state.textHighlightVariant,
-    gridMotion: state.gridMotion,
-    gridVariant: state.gridVariant,
+    categoryImageMode: state.categoryImageMode,
     debugSectionOrder: getCurrentDebugSectionOrder(panel)
-  });
+  };
 }
 
 async function persistVisualSettings(settings, preset = currentVisualPreset(), options = {}) {
@@ -1261,6 +1360,7 @@ function applyVisualSettings(settings) {
   applyTextHighlightVariant(visualSettings.textHighlightVariant);
   applyGridMotion(visualSettings.gridMotion);
   applyGridVariant(visualSettings.gridVariant);
+  applyCategoryImageMode(visualSettings.categoryImageMode);
   applyDebugSectionOrder(visualSettings.debugSectionOrder);
   applyBackgroundDebugControls(visualSettings.debug);
 }
@@ -1278,14 +1378,6 @@ function applyBackgroundDebugControls(preset) {
 }
 
 function resetBackgroundDebugControls() {
-  applyHeroLayout("background");
-  applyHeroSlidesTone("color");
-  applyHeroMotion("fade");
-  applyHeroAutoPause("on");
-  applyTextMotion("on");
-  applyTextHighlightVariant("knife");
-  applyGridMotion("on");
-  applyGridVariant("original");
   applyDebugSectionOrder(debugSectionDefaultOrder);
   applyBackgroundDebugControls(backgroundDebugDefaults);
   setDebugSaveStatus("Reset preview. Save to keep.");
@@ -1416,6 +1508,11 @@ function initBackgroundDebug() {
       setTextHighlightVariant(textHighlightVariantButton.dataset.textHighlightVariant);
       return;
     }
+    const categoryImageModeButton = event.target.closest("[data-category-image-mode]");
+    if (categoryImageModeButton) {
+      setCategoryImageMode(categoryImageModeButton.dataset.categoryImageMode);
+      return;
+    }
     const gridVariantButton = event.target.closest("[data-grid-variant]");
     if (gridVariantButton) {
       setGridVariant(gridVariantButton.dataset.gridVariant);
@@ -1449,10 +1546,22 @@ function initBackgroundDebug() {
 }
 
 function bindEvents() {
-  $("#searchInput").addEventListener("input", (event) => {
-    state.query = event.target.value;
+  const syncSearch = (value) => {
+    state.query = value;
+    const headerSearch = $("#headerSearchInput");
+    const catalogSearch = $("#searchInput");
+    if (headerSearch && headerSearch.value !== value) headerSearch.value = value;
+    if (catalogSearch && catalogSearch.value !== value) catalogSearch.value = value;
     renderProducts();
     refreshReveal();
+  };
+  $("#searchInput").addEventListener("input", (event) => {
+    syncSearch(event.target.value);
+  });
+  const headerSearchInput = $("#headerSearchInput");
+  if (headerSearchInput) headerSearchInput.addEventListener("input", (event) => {
+    state.query = event.target.value;
+    syncSearch(event.target.value);
   });
   document.addEventListener("click", (event) => {
     const category = event.target.closest("[data-category]");
@@ -1462,6 +1571,7 @@ function bindEvents() {
     const heroPause = event.target.closest("#heroPause");
     if (category) {
       state.category = category.dataset.category;
+      renderCategoryShowcase();
       renderCategories();
       renderProducts();
       refreshReveal();
@@ -1516,6 +1626,7 @@ async function init() {
   applyVisualSettings(visualSettings);
   renderHeroCarousel();
   startHeroCarousel();
+  renderCategoryShowcase();
   renderCategories();
   renderProducts();
   refreshReveal();
