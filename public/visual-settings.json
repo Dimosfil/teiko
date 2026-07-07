@@ -6,9 +6,9 @@
     },
     "logo": {
       "width": "164",
-      "height": "52",
-      "scale": "1",
-      "x": "0",
+      "height": "100",
+      "scale": "1.13",
+      "x": "-9",
       "y": "0"
     },
     "carousel": {
@@ -19,7 +19,7 @@
     },
     "catalogTitle": {
       "text": "Товары TEIKO",
-      "color": "#050505",
+      "color": "#000000",
       "font": "default"
     }
   },

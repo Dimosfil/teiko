@@ -34,6 +34,17 @@
         <div class="header-actions" aria-label="Покупательские действия">
           <a href="#catalog">Каталог</a>
           <a href="#about">Где купить</a>
+          <button
+            class="debug-toggle header-debug-toggle"
+            id="backgroundDebugToggle"
+            type="button"
+            aria-controls="backgroundDebug"
+            aria-expanded="false"
+            aria-label="Настройки витрины"
+            title="Настройки витрины"
+          >
+            BG
+          </button>
         </div>
       </div>
       <a class="brand" href="#top" aria-label="TEIKO">
@@ -210,18 +221,6 @@
       </section>
     </main>
 
-    <button
-      class="debug-toggle"
-      id="backgroundDebugToggle"
-      type="button"
-      aria-controls="backgroundDebug"
-      aria-expanded="false"
-      aria-label="Toggle background settings"
-      title="Background settings"
-      hidden
-    >
-      BG
-    </button>
     <aside class="debug-panel" id="backgroundDebug" aria-label="Background debug controls" hidden>
       <div class="debug-panel-head">
         <strong>BG</strong>
@@ -259,18 +258,18 @@
         </label>
         <label class="debug-control">
           <span>Height</span>
-          <input type="range" min="28" max="100" step="1" value="52" data-debug-layer="logo" data-debug-prop="height" />
-          <output data-debug-readout="logo-height">52px</output>
+          <input type="range" min="28" max="100" step="1" value="100" data-debug-layer="logo" data-debug-prop="height" />
+          <output data-debug-readout="logo-height">100px</output>
         </label>
         <label class="debug-control">
           <span>Scale</span>
-          <input type="range" min="0.5" max="1.8" step="0.01" value="1" data-debug-layer="logo" data-debug-prop="scale" />
-          <output data-debug-readout="logo-scale">1.00</output>
+          <input type="range" min="0.5" max="1.8" step="0.01" value="1.13" data-debug-layer="logo" data-debug-prop="scale" />
+          <output data-debug-readout="logo-scale">1.13</output>
         </label>
         <label class="debug-control">
           <span>X</span>
-          <input type="range" min="-120" max="120" step="1" value="0" data-debug-layer="logo" data-debug-prop="x" />
-          <output data-debug-readout="logo-x">0px</output>
+          <input type="range" min="-120" max="120" step="1" value="-9" data-debug-layer="logo" data-debug-prop="x" />
+          <output data-debug-readout="logo-x">-9px</output>
         </label>
         <label class="debug-control">
           <span>Y</span>
@@ -325,7 +324,7 @@
         </label>
         <label class="debug-color-control">
           <span>Color</span>
-          <input type="color" value="#050505" data-debug-layer="catalogTitle" data-debug-prop="color" />
+          <input type="color" value="#000000" data-debug-layer="catalogTitle" data-debug-prop="color" />
           <span class="debug-color-chip" data-debug-chip="catalogTitle"></span>
         </label>
         <label class="debug-text-control">

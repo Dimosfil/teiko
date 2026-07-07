@@ -35,9 +35,9 @@ const backgroundDebugDefaults = {
   },
   logo: {
     width: 164,
-    height: 52,
-    scale: 1,
-    x: 0,
+    height: 100,
+    scale: 1.13,
+    x: -9,
     y: 0
   },
   carousel: {
@@ -48,7 +48,7 @@ const backgroundDebugDefaults = {
   },
   catalogTitle: {
     text: "Товары TEIKO",
-    color: "#050505",
+    color: "#000000",
     font: "default"
   }
 };
@@ -57,6 +57,7 @@ const visualSettingsPath = "/visual-settings/default.json";
 const visualSettingsLegacyPath = "/visual-settings.json";
 const visualSettingsIndexPath = "/visual-settings/index.json";
 const visualSettingsApiPath = "/api/visual-settings";
+const visualSettingsPhpPath = "/api/visual-settings.php";
 const storefrontStaticPath = "/storefront.json";
 const visualSettingsStorageKey = "teiko.visualSettings.v1";
 const defaultVisualPreset = { id: "default", name: "Default" };
@@ -702,6 +703,8 @@ function categoryCard(category, index) {
   const meta = categoryMeta(category, index);
   return `
     <button class="category-card ${category === state.category ? "active" : ""}" type="button" data-category="${escapeHtml(category)}" style="--category-accent: ${meta.accent}" aria-label="${escapeHtml(`${category}: ${productCountLabel(meta.count)}`)}">
+      <span class="category-card-title">${escapeHtml(category)}</span>
+      <span class="category-card-count">${escapeHtml(productCountLabel(meta.count))}</span>
       <span class="category-card-media">
         <img src="${imageUrl(meta.image)}" alt="" loading="lazy" />
       </span>
@@ -941,7 +944,14 @@ function applyBackgroundDebugValue(layer, prop, value) {
     } else if (layer === "background") {
       const cssVar = prop === "base" ? "--hero-bg-base" : "--hero-bg-tint";
       hero.style.setProperty(cssVar, color);
-      if (prop === "base") hero.style.setProperty("--hero-back-base", color);
+      if (prop === "base") {
+        hero.style.setProperty("--hero-back-base", color);
+        document.documentElement.style.setProperty("--bg", color);
+        document.documentElement.style.setProperty("--page-bg", color);
+      }
+      if (prop === "tint") {
+        document.documentElement.style.setProperty("--page-tint", color);
+      }
     }
     updateDebugReadout(layer, prop, color);
     return;
@@ -1216,18 +1226,29 @@ async function loadVisualPresetSettings(presetId) {
     return normalizeVisualSettings(await loadJson(`${visualSettingsApiPath}/${safeId}`));
   } catch {
     try {
-      return normalizeVisualSettings(await loadJson(`/visual-settings/${safeId}.json`));
+      return normalizeVisualSettings(await loadJson(`${visualSettingsPhpPath}?id=${encodeURIComponent(safeId)}`));
     } catch {
-      const stored = readStoredVisualSettings();
-      return normalizeVisualSettings(stored?.settingsByPreset?.[safeId]);
+      try {
+        return normalizeVisualSettings(await loadJson(`/visual-settings/${safeId}.json`));
+      } catch {
+        const stored = readStoredVisualSettings();
+        return normalizeVisualSettings(stored?.settingsByPreset?.[safeId]);
+      }
     }
   }
 }
 
 async function loadVisualSettings() {
   const stored = readStoredVisualSettings();
+  const loadServerSettings = async () => {
+    try {
+      return await loadJson(visualSettingsApiPath);
+    } catch {
+      return loadJson(visualSettingsPhpPath);
+    }
+  };
   try {
-    const data = await loadJson(visualSettingsApiPath);
+    const data = await loadServerSettings();
     const index = mergeVisualPresetIndexes(data, stored?.index);
     const activePreset = normalizePresetId(data.activePreset, index.activePreset);
     setVisualPresets({ ...index, activePreset });
@@ -1276,12 +1297,27 @@ async function persistVisualSettings(settings, preset = currentVisualPreset(), o
   const presetId = normalizePresetId(preset.id, defaultVisualPreset.id);
   const presetName = normalizePresetName(preset.name, presetId);
   const activateTheme = options.activateTheme !== false;
+  const body = JSON.stringify({ id: presetId, name: presetName, activate: activateTheme, settings });
+  const saveToNodeApi = () => fetch(`${visualSettingsApiPath}/${presetId}?activate=${activateTheme ? "1" : "0"}`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body
+  });
+  const saveToStaticHostApi = () => fetch(`${visualSettingsPhpPath}?id=${encodeURIComponent(presetId)}&activate=${activateTheme ? "1" : "0"}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body
+  });
   try {
-    const response = await fetch(`${visualSettingsApiPath}/${presetId}?activate=${activateTheme ? "1" : "0"}`, {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id: presetId, name: presetName, activate: activateTheme, settings })
-    });
+    let response;
+    try {
+      response = await saveToNodeApi();
+    } catch {
+      response = await saveToStaticHostApi();
+    }
+    if (!response.ok && [404, 405, 501].includes(response.status)) {
+      response = await saveToStaticHostApi();
+    }
     if (!response.ok) {
       const message = await response.text();
       throw new Error(message || "Visual settings save failed");
@@ -1470,11 +1506,6 @@ function initBackgroundDebug() {
   const panel = $("#backgroundDebug");
   if (!panel) return;
   const toggle = $("#backgroundDebugToggle");
-  if (!visualDebugEnabled()) {
-    if (toggle) toggle.hidden = true;
-    panel.hidden = true;
-    return;
-  }
   if (toggle) toggle.hidden = false;
   if (toggle) {
     toggle.addEventListener("click", () => {
