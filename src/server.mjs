@@ -261,6 +261,10 @@ app.post("/visual-settings/:presetFile", (req, res) => {
 app.use("/uploads", express.static(uploadDir));
 app.use(express.static(publicDir));
 
+app.get(["/teiko", "/marketplaces", "/links"], (_req, res) => {
+  res.sendFile(path.join(publicDir, "teiko", "index.html"));
+});
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "teiko-showcase" });
 });

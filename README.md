@@ -8,6 +8,10 @@ marketplaces such as Ozon, Wildberries, or Yandex Market.
 
 - Public storefront with hero slides, brand text, product filters, product
   details, and marketplace links.
+- Mobile-friendly marketplace links page at `/teiko` with the official Ozon
+  store and a path back to the main storefront. `/marketplaces` and `/links`
+  are aliases when the Node.js server is running; the published static address
+  is `/teiko/`.
 - Admin panel at `/test-admin-teiko` for changing header text, hero/about copy,
   slides, product cards, product photos, descriptions, specs, and marketplace
   links. The public site does not link to this path.
