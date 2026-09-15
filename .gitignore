@@ -19,3 +19,6 @@ data/*.sqlite
 data/*.sqlite-*
 data/visual-settings/
 public/.idea/
+
+# Locally prepared website video and poster; source manifest: docs/hero-media.md
+public/assets/cinematic/

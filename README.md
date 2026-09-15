@@ -6,6 +6,11 @@ marketplaces such as Ozon, Wildberries, or Yandex Market.
 
 ## Features
 
+- Cinematic TEIKO storefront: detailing video, green brand accents, animated
+  sections, product search and category filters. See
+  [redesign notes](docs/hipershield-redesign.md) and
+  [video source and restoration](docs/hero-media.md).
+
 - Public storefront with hero slides, brand text, product filters, product
   details, and marketplace links.
 - Mobile-friendly marketplace links page at `/teiko` with the official Ozon

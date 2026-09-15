@@ -17,7 +17,7 @@ Linked from: `README.md` and `tools/AGENT_RUNBOOK.md`
 | Layer | Technology | Evidence | Notes |
 | --- | --- | --- | --- |
 | Language/runtime | Node.js 24 | `package.json`, `Dockerfile` | ESM modules. |
-| Frontend | Static HTML/CSS/vanilla JS | `public/index.html`, `public/app.js`, `public/styles.css` | Public storefront. |
+| Frontend | Static HTML/CSS/vanilla JS | `public/index.html`, `public/storefront.js`, `public/storefront.css` | Public storefront. |
 | Admin UI | Static HTML/CSS/vanilla JS | `admin-console/index.html`, `admin-console/admin.js` | Served only at `ADMIN_PATH`, default `/test-admin-teiko`; protected by admin password API header. |
 | Backend/API | Express 5 | `src/server.mjs` | Public read API and admin mutation API. |
 | Data/storage | SQLite file through `sql.js` | `src/db.mjs` | Local path `data/teiko.sqlite`; Docker path `/app/data/teiko.sqlite`. |

@@ -213,5 +213,8 @@
                                "2026.07.05.2__add_agent_role_office",
                                "2026.07.06.1__add_startup_product_engineering"
                            ],
-    "last_update_check_at":  "2026-07-06T11:16:02+03:00"
+    "last_update_check_at":  "2026-07-06T11:16:02+03:00",
+    "config_service": {
+        "enabled": false
+    }
 }
