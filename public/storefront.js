@@ -1,8 +1,10 @@
+import { initStorefrontEffects } from "./storefront-effects.js?v=20260915-motion4";
+
 (() => {
   "use strict";
 
   const $ = (selector) => document.querySelector(selector);
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const reducedMotion = createMotionPolicy();
   const currency = new Intl.NumberFormat("ru-RU", {
     style: "currency", currency: "RUB", maximumFractionDigits: 0
   });
@@ -31,6 +33,50 @@
     "krytex-parfume-2-sea-breeze-hero.png": "KRYTEX Parfume Pro: аромат Морской бриз"
   };
 
+  function createMotionPolicy() {
+    const changes = new EventTarget();
+    // Every visit starts with the full presentation, even if an earlier visit
+    // stored an off state. The control only changes the current page session.
+    let preference = "full";
+    const policy = {
+      get matches() { return preference === "reduced"; },
+      addEventListener: (...args) => changes.addEventListener(...args),
+      removeEventListener: (...args) => changes.removeEventListener(...args)
+    };
+    const apply = () => {
+      document.documentElement.dataset.motion = policy.matches ? "reduced" : "full";
+      const toggle = $("#motionToggle");
+      if (toggle) {
+        toggle.textContent = policy.matches ? "Анимации выключены — включить" : "Анимации включены";
+        toggle.setAttribute("aria-label", policy.matches ? "Включить анимации" : "Выключить анимации");
+        toggle.setAttribute("aria-pressed", String(!policy.matches));
+      }
+    };
+    $("#motionToggle")?.addEventListener("click", () => {
+      preference = policy.matches ? "full" : "reduced";
+      apply();
+      changes.dispatchEvent(new Event("change"));
+    });
+    apply();
+    return policy;
+  }
+
+  function initEntrance() {
+    const root = document.documentElement;
+    const prepare = () => {
+      root.dataset.motionStage = reducedMotion.matches || window.scrollY > 100 ? "done" : "waiting";
+      start();
+    };
+    const start = () => {
+      if (root.dataset.motionStage === "waiting" && !document.hidden && !reducedMotion.matches) {
+        root.dataset.motionStage = "running";
+      }
+    };
+    prepare();
+    document.addEventListener("visibilitychange", start);
+    reducedMotion.addEventListener("change", prepare);
+  }
+
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, (character) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -50,7 +96,12 @@
   }
 
   function imageUrl(value) {
-    return safeUrl(value) || "/assets/logo-alpha.png";
+    const source = safeUrl(value) || safeUrl("/assets/logo-alpha.png");
+    const url = new URL(source);
+    if (url.origin === window.location.origin && url.pathname.startsWith("/uploads/")) {
+      url.searchParams.set("asset", "20260915-motion4");
+    }
+    return url.href;
   }
 
   function price(value) {
@@ -422,17 +473,35 @@
           entry.target.classList.add("is-visible");
           state.revealObserver.unobserve(entry.target);
         });
-      }, { threshold: 0.08, rootMargin: "0px 0px -24px 0px" });
+      }, { threshold: 0.08, rootMargin: "0px 0px -60px 0px" });
     }
     observeReveal();
     reducedMotion.addEventListener("change", () => {
-      if (!reducedMotion.matches) return;
       state.revealObserver?.disconnect();
-      document.querySelectorAll("[data-reveal]").forEach((element) => element.classList.add("is-visible"));
+      document.querySelectorAll("[data-reveal]").forEach((element) => {
+        // Keep content already on screen stable; stage only content still below it.
+        if (reducedMotion.matches || element.getBoundingClientRect().top < window.innerHeight) {
+          element.classList.add("is-visible");
+        } else {
+          element.classList.remove("is-visible");
+        }
+      });
+      observeReveal();
     });
   }
 
   function initNavigation() {
+    document.addEventListener("click", (event) => {
+      const anchor = event.target.closest("a[href^='#']");
+      if (!anchor || anchor.classList.contains("skip-link") || event.defaultPrevented
+        || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const id = anchor.getAttribute("href").slice(1);
+      const target = id && document.getElementById(id);
+      if (!target) return;
+      event.preventDefault();
+      history.pushState(null, "", `#${id}`);
+      target.scrollIntoView({ behavior: reducedMotion.matches ? "instant" : "smooth", block: "start" });
+    });
     const marqueeToggle = $("#marqueeToggle");
     marqueeToggle?.addEventListener("click", () => {
       const paused = marqueeToggle.getAttribute("aria-pressed") !== "true";
@@ -464,19 +533,38 @@
     document.addEventListener("click", (event) => {
       if (nav && toggle && !nav.contains(event.target) && !toggle.contains(event.target)) setOpen(false);
     });
-    const header = $(".site-header");
-    const updateHeader = () => header?.classList.toggle("is-scrolled", window.scrollY > 24);
-    window.addEventListener("scroll", updateHeader, { passive: true });
-    updateHeader();
     writeText("year", String(new Date().getFullYear()));
   }
 
+  function initProductImageRecovery() {
+    $("#products")?.addEventListener("error", (event) => {
+      const image = event.target;
+      if (!(image instanceof HTMLImageElement) || !image.classList.contains("product-image")) return;
+      if (!image.dataset.retry) {
+        image.dataset.retry = "1";
+        const retry = new URL(image.src);
+        retry.searchParams.set("retry", String(Date.now()));
+        image.src = retry.href;
+        return;
+      }
+      const fallback = document.createElement("div");
+      fallback.className = "product-image image-fallback";
+      fallback.setAttribute("role", "img");
+      fallback.setAttribute("aria-label", image.alt || "Товар TEIKO");
+      fallback.innerHTML = '<span>TEIKO</span><i></i><small>Искусство ухода</small>';
+      image.replaceWith(fallback);
+    }, true);
+  }
+
   async function init() {
+    initEntrance();
     initNavigation();
+    initProductImageRecovery();
     initVideo();
     initReveal();
     initCatalogEvents();
     initStories();
+    initStorefrontEffects(reducedMotion);
     try {
       const data = await loadStorefront();
       state.products = data.products.filter((product) => product && product.isActive !== false);

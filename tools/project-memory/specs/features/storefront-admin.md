@@ -11,13 +11,14 @@ Wildberries, Yandex Market, or another configured URL.
 
 The September 2026 redesign replaces the former Grass/Leraton layout with the
 Hipershield-inspired composition requested by the user. Public entrypoints are
-`public/index.html`, `public/storefront.css`, and `public/storefront.js`.
+`public/index.html`, `public/storefront.css`, `public/storefront.js`, and
+`public/storefront-effects.js`.
 The admin continues to use its original assets and APIs.
 
 1. A dark full-width detailing video opens the page beneath an absolute header.
-   TEIKO green replaces the reference's red accents. The brief CSS intro cannot
+   TEIKO green replaces the reference's red accents. The roughly 3-second CSS intro cannot
    block navigation or leave the page hidden if JavaScript fails.
-2. The visitor can jump to brand information, the catalogue, or buying guidance.
+2. The visitor scrolls smoothly to brand information, the catalogue, or buying guidance.
    Mobile navigation is a keyboard-operable expanded/collapsed menu.
 3. White brand information, benefits, a dark automotive scene and promotional
    collections lead to the catalogue. Existing admin-managed slides remain in
@@ -34,10 +35,22 @@ The admin continues to use its original assets and APIs.
 ## Presentation And Motion
 
 - Montserrat, white content sections, black/deep-green panels, green `#48b45a`.
-- Menu underline, one-time scroll reveals, horizontal brand marquee, photo zoom,
-  rising catalogue CTA, manual/automatic promotional carousel.
-- Reduced motion disables decorative animations and automatic media. A poster
-  remains available; video download begins only on eligible playback/manual play.
+- Menu underline, one-time 1s scroll reveals and a stepped brand carousel
+  with equal-width slots (1500ms hold / 500ms move). Hero entrance starts
+  after the intro's 3.05s hold and 0.7s upward exit. The intro also animates
+  its logo, light sweep, progress line and tagline.
+- Product hover/focus expands lower padding by 60px in 300ms, revealing a
+  centered CTA from bottom -100px to 10px. Photos retain size. ResizeObserver lays out two
+  independent columns without changing DOM/tab order. At <=760px the regular
+  single-column grid returns. Touch/coarse-pointer devices show the CTA directly.
+- Full motion starts on every visit. The visible control shows that it is on;
+  turning it off affects the current page session only. The older saved
+  `teiko.motion` value is ignored. Re-enabling motion re-observes only
+  below-screen sections. Reduced mode stops decorative transitions and automatic
+  media; eligible/manual play loads video.
+- Product images use a publication-version URL to bypass stale browser cache.
+  On load failure, the card retries once, then displays an inline branded
+  placeholder rather than an empty broken image.
 - The hidden browser tab pauses video and slides. A user-paused video stays paused.
 - API content has priority over HTML copy except exact retired seed strings.
   Explicit custom hero/about/contact texts and configured logo still work.
@@ -51,7 +64,7 @@ The admin continues to use its original assets and APIs.
 ## Verification — 2026-09-15
 
 - JavaScript syntax and scoped Git whitespace checks passed.
-- HTML has 36 unique IDs; all local anchors and resource references resolve.
+- HTML has 37 unique IDs; all local anchors and resource references resolve.
 - All 12 product and 7 slide image files exist; source text passes UTF-8 checks.
 - Isolated VM checks cover URL rejection, HTML escaping, DOM IDs and the
   distinction between retired seed copy and custom administrative text.
@@ -60,7 +73,24 @@ The admin continues to use its original assets and APIs.
   is explicitly disabled in `instruction-kit.json`; local startup uses the
   documented port 3000. Health, storefront API and encoding checks pass;
   the redesigned HTML and MP4 return HTTP 200. Startup error log is empty.
-- No live browser verification or external publication has been performed.
+- Live browser review of the earlier motion revision after the user's reference recording:
+  full motion works with system reduce=true; that revision persisted the explicit
+  override after reload, while the current revision starts full on each visit. The video
+  advances and pauses when motion is disabled; no console warnings/errors seen.
+  First card height 541 -> 601px moves the next left card 573 -> 633px while the
+  right card stays at 599px. Product dialog opens with its marketplace link.
+  Search empty-state clears masonry and clearing the query restores 12 products.
+  At 390px no horizontal overflow or absolute card positioning; mobile menu and
+  Escape work. Default 1257px viewport restored after testing.
+- Follow-up video review: reference CTA is centered and partner names use equal
+  slots. Centered product CTA now aligns exactly with card center; equal brand
+  intervals measure 258.25px at 1257px viewport and 174px at 390px.
+- Isolated VM checks cover independent-column recalculation/mobile reset and
+  reduced/full policy transitions. Those browser checks describe the earlier
+  motion revision; the current revision was checked by syntax, static build,
+  local API, published file SHA-256 and public HTTP requests. The deployed
+  catalog has 12 products and 7 slides; all 21 product, slide, video and poster
+  URLs return HTTP 200 with the expected file sizes.
 
 ## Admin Workflow
 

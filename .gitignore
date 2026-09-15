@@ -22,3 +22,9 @@ public/.idea/
 
 # Locally prepared website video and poster; source manifest: docs/hero-media.md
 public/assets/cinematic/
+dist/
+dist-patch/
+.dist-next-*/
+
+# Local reference-video review frames
+data/motion-review/

@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/storefront.css?v=20260915" />
-  <script defer src="/storefront.js?v=20260915"></script>
+  <link rel="stylesheet" href="/storefront.css?v=20260915-motion4" />
+  <script type="module" src="/storefront.js?v=20260915-motion4"></script>
 </head>
 <body>
-  <div class="page-intro" aria-hidden="true"><span>TEIKO</span><i></i></div>
+  <div class="page-intro" aria-hidden="true"><span>TEIKO</span><i></i><small>Искусство ухода за автомобилем</small></div>
   <a class="skip-link" href="#catalog">Перейти к каталогу</a>
   <header class="site-header">
     <div class="container header-inner">
@@ -41,7 +41,10 @@
       <div class="container hero-bottom">
         <a class="scroll-cue" href="#about"><span class="mouse"><i></i></span><span>Узнать TEIKO</span><span aria-hidden="true">↓</span></a>
         <span class="hero-caption">Чистота. Защита. Характер.</span>
-        <button id="videoToggle" class="video-toggle" type="button" aria-label="Включить фоновое видео" aria-pressed="false"><span aria-hidden="true">▶</span><span>Видео</span></button>
+        <div class="hero-controls">
+          <button id="motionToggle" class="video-toggle motion-toggle" type="button" aria-label="Выключить анимации" aria-pressed="true">Анимации включены</button>
+          <button id="videoToggle" class="video-toggle" type="button" aria-label="Включить фоновое видео" aria-pressed="false"><span aria-hidden="true">▶</span><span>Видео</span></button>
+        </div>
       </div>
     </section>
 
